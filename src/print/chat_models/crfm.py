@@ -155,6 +155,7 @@ class crfmChatLLM(SimpleChatModel):
         # Make a request
         tries = 0
         result = None
+        print(messages)
         while tries < self.max_retries:
             try:
                 tries += 1

@@ -1,11 +1,10 @@
-##  print: inverse alignment
+##  print
 
 ### 📂 Repro structure
 ```
 ├── src                  
 │   └── print     
 ├── experiments    
-│   ├── exp_1
 ├── LICENSE              
 ├── requirements.txt    
 ├── pyproject.toml    
