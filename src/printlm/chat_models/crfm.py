@@ -102,7 +102,7 @@ class crfmChatLLM(SimpleChatModel):
     """Penalizes repeated tokens according to frequency."""
     presence_penalty: float = 0
     """Penalizes repeated tokens."""
-    num_completions: int = 1
+    num_completions: int = 2
     """How many completions to generate for each prompt. Note: this is usually `n' for langchain models"""
     top_k_per_token: int = 1
     """number of candidates per token position in each completion"""

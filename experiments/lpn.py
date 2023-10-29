@@ -74,11 +74,11 @@ def utility_func(algorithm_str: str):
 
         samples = np.random.binomial(1, 0.5, (n_train_samples + n_test_samples, n_bits))
         masked_samples = samples * true_bits
-        parity = np.sum(masked_samples, axis=1) 
+        parity = np.sum(masked_samples, axis=1) % 2
         train_samples = samples[:n_train_samples]
         train_parity = parity[:n_train_samples]
         parity_noise = np.random.binomial(1, noise_level, n_train_samples)
-        train_parity = (train_parity + parity_noise) 
+        train_parity = (train_parity + parity_noise) % 2
 
         test_samples = samples[n_train_samples:]
         test_parity = parity[n_train_samples:]
