@@ -13,10 +13,10 @@ from langchain.prompts.chat import (
 from langchain.chains.llm import LLMChain
 from langchain.chat_models.base import BaseChatModel
 
-from print.tasks.insert_print.agents.base import BaseAgent
+from printlm.tasks.insert_print.agents.base import BaseAgent
 
-from print.tasks.insert_print.prompts.coder.models import CoderPrompt
-from print.tasks.insert_print.prompts.task.models import TaskPrompt
+from printlm.tasks.insert_print.prompts.coder.models import CoderPrompt
+from printlm.tasks.insert_print.prompts.task.models import TaskPrompt
 
 
 class CoderAgent(BaseAgent):

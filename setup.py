@@ -4,11 +4,11 @@ with open("requirements.txt", "r") as file:
     requirements = file.read().splitlines()
 
 setuptools.setup(
-    name="print",
+    name="printlm",
     version="0.0.1",
-    author="print",
-    author_email="print",
-    description="print: a simulator for learning ai constitutions with meta-prompt",
+    author="printlm",
+    author_email="printlm",
+    description="printlm: a simulator for learning ai constitutions with meta-prompt",
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     classifiers=[

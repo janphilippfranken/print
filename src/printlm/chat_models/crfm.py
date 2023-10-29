@@ -92,7 +92,7 @@ class crfmChatLLM(SimpleChatModel):
     """Model name to use."""
     temperature: float = 0.7
     """What sampling temperature to use."""
-    max_tokens: int = 1000 
+    max_tokens: int = 5000
     """The maximum number of tokens to generate in the completion.
     -1 returns as many tokens as possible given the prompt and
     the models maximal context size."""

@@ -48,12 +48,11 @@ def utility(algorithm_str: str):
     return average_correct
 """
 
-
 import random
 import numpy as np
 import time
 
-def utility(algorithm_str: str):
+def utility_func(algorithm_str: str):
     "Implements the parity learning task. Returns the number of correct predictions."
     
     n_tests = 1
@@ -85,13 +84,14 @@ def utility(algorithm_str: str):
         test_parity = parity[n_train_samples:]
 
         # Because algorithm is a string, we can’t call it directly. Instead, we can use eval to evaluate it as a Python expression.
-        try:
-            predictions = algorithm(train_samples, train_parity, test_samples)
-            test_parity = np.array(test_parity).reshape(-1)
-            predictions = np.array(predictions).reshape(-1)
-            correct = np.sum(predictions == test_parity) / n_test_samples
-        except:
-            correct = 0
+       
+        predictions = algorithm(train_samples, train_parity, test_samples)
+        print('predictions', predictions)
+        test_parity = np.array(test_parity).reshape(-1)
+        predictions = np.array(predictions).reshape(-1)
+        correct = np.sum(predictions == test_parity) / n_test_samples
+        # except:
+        #     correct = 0
         if time.time() - start_time > 0.1:
             return 0
         average_correct += correct / n_tests
@@ -111,9 +111,4 @@ class Utility():
         self.str = ustr
         self.func = ufunc
 
-utility_class = Utility(ustr=utility_str, ufunc=utility)
-
-# print(utility_class.str)
-print(utility_class.func)
-
-solution = improve_algorithm(initial_solution=initial_solution, utility=utility_class, language_model=llm)
+utility_class = Utility(ustr=utility_str, ufunc=utility_func)
