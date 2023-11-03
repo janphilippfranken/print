@@ -10,6 +10,27 @@ from typing import (
 
 import random
 
+from datasets import load_dataset
+import json
+
+def get_apps_dataset(name="codeparrot/apps", split="test", difficulty="introductory"):
+    """Load the dataset."""
+    dataset = load_dataset(name, split=split)
+   
+    # Load the interview JSON file
+    with open(f"{difficulty}.json", "r") as f:
+        difficulty_json = json.load(f)
+
+    # Remove leading zeros and convert to string
+    difficulty_json = [str(int(i)) for i in difficulty_json]
+
+    # Use a single filter operation instead of a loop
+    # This assumes 'problem_id' is a column in your dataset.
+    filtered_data = dataset.filter(lambda example: str(example["problem_id"]) in difficulty_json)
+
+    return filtered_data
+
+
 def extract_code(algorithm_str: str) -> str:
     """Extract code from algorithm string."""
     code = algorithm_str.split("```")[1][6:]  # 6 is the length of "python"
