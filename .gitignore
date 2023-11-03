@@ -10,6 +10,11 @@ __pycache__/
 # sim_res
 # /sim_res
 
+# **/data
+# data
+# /data
+
+
 # **/.hydra/
 
 # C extensions
