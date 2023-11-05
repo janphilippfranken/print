@@ -1,11 +1,7 @@
 # pip install crfm-helm@git+https://github.com/stanford-crfm/helm.git@main # run this separately
-fire==0.5.0
+fire
 hydra-core
 langchain
 omegaconf
-pandas
-path
-seaborn
-sphinx
-streamlit
 tqdm
+openai

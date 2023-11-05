@@ -98,16 +98,10 @@ def utility_func(algorithm_str: str):
 
     return average_correct
 
-initial_solution = """from sklearn.linear_model import LogisticRegression
-
-def algorithm(train_samples, train_parity, test_samples):
-    return 100"""
-
 
 class Utility():
 
     def __init__(self, ustr, ufunc):
-        self.budget = 1
         self.str = ustr
         self.func = ufunc
 
