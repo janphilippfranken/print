@@ -17,6 +17,15 @@ def extract_code(
         code = algorithm_str.split("```")[1][6:]
         return code
 
+def evaluate_code(
+    algorithm_str: str,
+    test_cases: List[Tuple[Any, Any]],
+) -> List[Any]:
+    """Evaluates code against test cases."""
+    code = extract_code(algorithm_str)
+
+    return [eval(code)(test_case[0]) == test_case[1] for test_case in test_cases]
+
 def delete_print_statement(algorithm_str: str) -> str:
     """Deletes a print statement from the algorithm."""
     lines = algorithm_str.split('\n')

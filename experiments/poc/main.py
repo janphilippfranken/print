@@ -3,7 +3,7 @@ from omegaconf import DictConfig
 from tqdm import tqdm
 import os
 
-from data import get_apps_dataset
+from experiments.apps.data import get_apps_dataset
  
 from helpers import extract_code
 
@@ -46,39 +46,35 @@ def main(args: DictConfig) -> None:
     feedback_agent = FeedbackAgent(llm=feedback_llm, model_id="feedback", **args.model.feedback)
     repair_agent = RepairAgent(llm=repair_llm, model_id="repair", **args.model.repair)
 
-    # get dataset 
+    # get toy problem
     dataset = get_apps_dataset(difficulty=args.data.difficulty)
 
-    # run agents
-    for datum in tqdm(dataset):
-        if datum["problem_id"] == 4004:
 
-            # task prompt 
-            task_prompt = TASK_PROMPTS["task_prompt_1"]
-            task_prompt.content = datum["question"]
-            
-            # code model response 
-            code_model_response = code_agent.run(
-                code_prompt=CODE_PROMPTS["code_prompt_1"],
-                task_prompt=task_prompt,
-            )
+    # task prompt 
+    task_prompt = TASK_PROMPTS["task_prompt_1"]
+    task_prompt.content = datum["question"]
     
-            # feedback model response
-            feedback_model_response = feedback_agent.run(
-                feedback_prompt=FEEDBACK_PROMPTS["feedback_prompt_1"],
-                task_prompt=task_prompt,
-                initial_code=code_model_response["response_str"],
-            )
-            
-            # repair model response
-            repair_model_response = repair_agent.run(
-                repair_prompt=REPAIR_PROMPTS["repair_prompt_1"],
-                task_prompt=task_prompt,
-                initial_code=code_model_response["response_str"],
-                feedback=feedback_model_response["response_str"],
-            )
+    # code model response 
+    code_model_response = code_agent.run(
+        code_prompt=CODE_PROMPTS["code_prompt_1"],
+        task_prompt=task_prompt,
+    )
+
+    # feedback model response
+    feedback_model_response = feedback_agent.run(
+        feedback_prompt=FEEDBACK_PROMPTS["feedback_prompt_1"],
+        task_prompt=task_prompt,
+        initial_code=code_model_response["response_str"],
+    )
+    
+    # repair model response
+    repair_model_response = repair_agent.run(
+        repair_prompt=REPAIR_PROMPTS["repair_prompt_1"],
+        task_prompt=task_prompt,
+        initial_code=code_model_response["response_str"],
+        feedback=feedback_model_response["response_str"],
+    )
 
 
-        
 if __name__ == '__main__':
     main()

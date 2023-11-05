@@ -10,9 +10,9 @@ from printlm.chat_models.crfm import crfmChatLLM
 
 from helpers import extract_code, format_response
 
-from lpn import utility_class
+from experiments.poc.task import utility_class
 
-llm = crfmChatLLM(model_name="openai/gpt-4-0613", crfm_api_key="p4z0j9adj6edJOWBMnEqfPBZxAXlfOGd")
+llm = crfmChatLLM(model_name="openai/gpt-4-0613", crfm_api_key="")
 
 def meta_utility(improve_str: str):
 
