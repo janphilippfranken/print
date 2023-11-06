@@ -6,10 +6,7 @@ from typing import (
 
 from abc import ABC, abstractmethod
 
-from printlm.memory.buffer import ConversationBuffer
-from printlm.memory.memory import ChatMemory
-
-from printlm.agents.prices import MODEL_COST_PER_INPUT, MODEL_COST_PER_OUTPUT
+from printlm.language_agents.prices import MODEL_COST_PER_INPUT, MODEL_COST_PER_OUTPUT
 
 
 class BaseAgent(ABC):
@@ -53,14 +50,14 @@ class BaseAgent(ABC):
         return cost
         
     @abstractmethod
-    def _get_prompt(self) -> List[Dict[str, str]]:
+    def get_prompt(self) -> List[Dict[str, str]]:
         """
         Get the prompt fed into the model. 
         """
         raise NotImplementedError
 
     @abstractmethod
-    def _get_response(self) -> str:
+    def get_response(self) -> str:
         """
         Get the response from the model. 
         """

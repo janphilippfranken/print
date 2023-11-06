@@ -8,7 +8,7 @@ from experiments.apps.data import get_apps_dataset
 from helpers import extract_code
 
 # llm class
-from printlm.chat_models.azure import AzureChatLLM
+from printlm.chat_models.azure import AsyncAzureChatLLM
 
 # prompts 
 # from printlm.prompts.code.prompts import CODE_PROMPTS
@@ -20,9 +20,9 @@ from printlm.chat_models.azure import AzureChatLLM
 def get_llm(
     args: DictConfig,         
     is_azure: bool,
-) -> AzureChatLLM:
+) -> AsyncAzureChatLLM:
     if is_azure:
-        llm = AzureChatLLM(**args.model.azure_api)
+        llm = AsyncAzureChatLLM(**args.model.azure_api)
         return llm
     else:
         print(f"ERROR: {args.model.api} is not a valid API (yet)")

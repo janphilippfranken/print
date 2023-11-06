@@ -2,6 +2,7 @@
 Custom crfm chat model adapted from https://github.com/hwchase17/langchain/blob/master/langchain/chat_models/base.py.
 
 Note:
+    - Currently Not Implemented to be Async; may be deprecated soon only tested repo with AsyncAzureChatLLM
     - requires crfm-helm v0.2.3 
     - currently only available via pip install crfm-helm@git+https://github.com/stanford-crfm/helm.git@main
 """

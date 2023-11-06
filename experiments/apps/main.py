@@ -8,10 +8,10 @@ from experiments.apps.data import get_apps_dataset
 from helpers import extract_code
 
 # llm class
-from printlm.chat_models.azure import AzureChatLLM
-from printlm.agents.llm import CodeAgent
-from printlm.agents.feedback import FeedbackAgent
-from printlm.agents.repair import RepairAgent
+from printlm.chat_models.azure import AsyncAzureChatLLM
+from printlm.language_agents.llm import CodeAgent
+from printlm.language_agents.feedback import FeedbackAgent
+from printlm.language_agents.repair import RepairAgent
 
 # prompts 
 from printlm.prompts.code.prompts import CODE_PROMPTS
@@ -23,11 +23,11 @@ from printlm.prompts.task.prompts import TASK_PROMPTS
 def get_llms(
     args: DictConfig,         
     is_azure: bool,
-) -> AzureChatLLM:
+) -> AsyncAzureChatLLM:
     if is_azure:
-        code_llm = AzureChatLLM(**args.model.azure_api)
-        feedback_llm = AzureChatLLM(**args.model.azure_api)
-        repair_llm = AzureChatLLM(**args.model.azure_api)
+        code_llm = AsyncAzureChatLLM(**args.model.azure_api)
+        feedback_llm = AsyncAzureChatLLM(**args.model.azure_api)
+        repair_llm = AsyncAzureChatLLM(**args.model.azure_api)
         return code_llm, feedback_llm, repair_llm
     else:
         print(f"ERROR: {args.model.api} is not a valid API (yet)")

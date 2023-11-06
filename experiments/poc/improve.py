@@ -1,5 +1,7 @@
 from helpers import extract_code
 
+from printlm.improvers.base import BaseImprover
+
 def improve_algorithm(initial_solution, utility, language_model):
 
     """Improves a solution according to a utility function."""
@@ -44,10 +46,5 @@ Your primary improvement must be novel and non-trivial. First, propose an idea, 
     best_solution = max(new_solutions, key=lambda x: utility.func(x))
     return best_solution"""
 
-class Improver():
-
-    def __init__(self, istr, ifunc):
-        self.str = istr
-        self.func = ifunc
-
-improver = Improver(improve_str, improve_algorithm)
+improver = BaseImprover(improver_id="1")
+improver.add_improver(improve_algorithm=improve_algorithm, improve_string=improve_str)

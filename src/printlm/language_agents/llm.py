@@ -8,7 +8,8 @@ import asyncio
 
 import pickle
 
-from printlm.agents.base import BaseAgent
+from printlm.chat_models.azure import AsyncAzureChatLLM
+from printlm.language_agents.base import BaseAgent
 
 
 class LLMAgent(BaseAgent):
@@ -26,7 +27,7 @@ class LLMAgent(BaseAgent):
         self.budget = budget
         self.model_args = model_args
 
-    def _get_prompt(
+    def get_prompt(
         self,
         system_message: str,
         user_message: str,
@@ -40,7 +41,7 @@ class LLMAgent(BaseAgent):
         ]
         return messages
     
-    async def _get_response(
+    async def get_response(
         self, 
         messages: List[Dict[str, str]],
         temperature: float = 0.7,
@@ -51,7 +52,7 @@ class LLMAgent(BaseAgent):
         self.model_args['temperature'] = temperature
         return await self.llm(messages=messages, **self.model_args)
     
-    def _store_response(
+    def store_response(
         self, 
         response: Any,
     ) -> None:
@@ -80,9 +81,9 @@ class LLMAgent(BaseAgent):
             A dictionary containing the code model's response and the cost of the performed API call
         """
         # Get the prompt
-        messages = self._get_prompt(system_message=expertise, user_message=message)
+        messages = self.get_prompt(system_message=expertise, user_message=message)
         # Get the response
-        response = await self._get_response(messages=messages, temperature=temperature)
+        response = await self.get_response(messages=messages, temperature=temperature)
         # Get Cost
         cost = self.calc_cost(response=response)
         print(f"Cost: {cost}")
@@ -92,7 +93,7 @@ class LLMAgent(BaseAgent):
             'response_str': response.choices[0].message.content,
             'cost': cost
         }
-        self._store_response(response=full_response)
+        self.store_response(response=full_response)
         # Return str response
         return response.choices[0].message.content
     

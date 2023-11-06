@@ -1,8 +1,11 @@
+from printlm.utility.base import BaseUtility
+
+"Utility Function As Code"
 import random
 import numpy as np
 
 
-def utility(algorithm_str: str):
+def utility_func(algorithm_str: str):
     """
     Implements the parity learning task. Returns the number of correct predictions.
     """
@@ -38,6 +41,7 @@ def utility(algorithm_str: str):
     
     return average_correct
 
+"Utility Function As String"
 utility_str = """import random
 import numpy as np
 
@@ -77,17 +81,25 @@ def utility(algorithm_str: str):
     
     return average_correct"""
 
+"Utility Object"
 
-class Utility():
-
-    def __init__(self, ustr, ufunc):
-        self.str = ustr
-        self.func = ufunc
-
-task_utility = Utility(ustr=utility_str, ufunc=utility)
+utility = BaseUtility(utility_id="parity")
+utility.add_utility(utility_func, utility_str)
 
 algorithm_str="""import numpy as np
 
 def algorithm(train_samples, train_parity, test_samples):
     predictions = np.random.binomial(1, 0.5, len(test_samples))
     return predictions"""
+
+class ParityTask():
+
+    def __init__(
+        self, 
+        utility, 
+        initial_solution,
+    ) -> None:
+        self.utility = utility
+        self.initial_solution = initial_solution
+
+parity_task = ParityTask(utility, algorithm_str)
