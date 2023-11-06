@@ -9,7 +9,7 @@ from helpers import extract_code
 
 # llm class
 from printlm.chat_models.azure import AzureChatLLM
-from printlm.agents.code import CodeAgent
+from printlm.agents.llm import CodeAgent
 from printlm.agents.feedback import FeedbackAgent
 from printlm.agents.repair import RepairAgent
 
@@ -67,14 +67,14 @@ def main(args: DictConfig) -> None:
             feedback_model_response = feedback_agent.run(
                 feedback_prompt=FEEDBACK_PROMPTS["feedback_prompt_1"],
                 task_prompt=task_prompt,
-                initial_code=code_model_response["response_str"],
+                initial_solution=code_model_response["response_str"],
             )
             
             # repair model response
             repair_model_response = repair_agent.run(
                 repair_prompt=REPAIR_PROMPTS["repair_prompt_1"],
                 task_prompt=task_prompt,
-                initial_code=code_model_response["response_str"],
+                initial_solution=code_model_response["response_str"],
                 feedback=feedback_model_response["response_str"],
             )
 

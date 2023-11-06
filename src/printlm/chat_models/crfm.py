@@ -134,8 +134,9 @@ class crfmChatLLM(SimpleChatModel):
         run_manager: Optional[CallbackManagerForLLMRun] = None,
     ) -> ChatResult:
         # convert to standard openai chat format (https://platform.openai.com/docs/guides/chat/introduction)
-        message_dicts = [_convert_message_to_dict(m) for m in messages] 
-        output_str = self._call(message_dicts, stop=stop, run_manager=run_manager)
+        # message_dicts = [_convert_message_to_dict(m) for m in messages] 
+        # output_str = self._call(message_dicts, stop=stop, run_manager=run_manager)
+        output_str = self._call(messages, stop=stop, run_manager=run_manager)
         message = AIMessage(content=output_str)
         generation = ChatGeneration(message=message)
         return ChatResult(generations=[generation])

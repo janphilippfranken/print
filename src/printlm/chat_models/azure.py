@@ -1,7 +1,6 @@
 from typing import List, Dict
 
-import os
-import openai
+from openai import AsyncAzureOpenAI
 
 class AzureChatLLM:
     """
@@ -10,34 +9,24 @@ class AzureChatLLM:
     def __init__(
         self, 
         api_key: str, 
-        api_base: str, 
+        azure_endpoint: str, 
         api_version: str, 
-        api_type: str,
         ):
-        self.api_key = api_key
-        self.api_base = api_base
-        self.api_version = api_version
-        self.api_type = api_type
-
-        # openai api
-        openai.api_key = self.api_key
-        openai.api_base = self.api_base
-        openai.api_version = self.api_version
-        openai.api_type = self.api_type
+        self.client = AsyncAzureOpenAI(
+            api_version=api_version,
+            api_key=api_key,
+            azure_endpoint=azure_endpoint,
+        )
 
     @property
     def llm_type(self):
         return "Azure"
 
-    def __call__(self, 
+    async def __call__(self, 
         messages: List[Dict[str, str]], 
         **kwargs,
     ):
         """
         Generates a response from a chat model.
         """
-        response = openai.ChatCompletion.create(
-            messages=messages, 
-            **kwargs)
-        
-        return response
+        return await self.client.chat.completions.create(messages=messages, **kwargs)

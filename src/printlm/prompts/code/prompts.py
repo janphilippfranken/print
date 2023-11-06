@@ -10,8 +10,7 @@ CODE_PROMPTS: Dict[str, CodePrompt] = {
     "code_prompt_1": CodePrompt(
         id="code_prompt_1",
         role="system",
-        content="""You are an expert Python programmer. You will be given a question (problem specification) and will generate a
-correct Python program that matches the specification and passes all tests. You will NOT return
-anything except for the program. Put your fixed program within code delimiters, for example: ```python```. Do not call the function, just define it. Call the program solution. It inputs one argument called input.""" ,
+        content="""You are an expert computer science researcher and programer. You will be given a score function and have to come up with a solution which is evaluated by the score function.
+        Return your solution using the following format ```python <Your Solution>```. Do not call your solution, just define it. Call the program "algorithm.""" ,
     ),
 }

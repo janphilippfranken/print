@@ -29,28 +29,6 @@ class BaseAgent(ABC):
         """
         self.llm = llm
         self.model_id = model_id
-
-    def _format_response(
-        self,
-        response: str, 
-        variables: list,
-    ) -> Dict[str, str]:
-        """
-        Format string response as dictionary of target variables and values.
-
-        Args:
-            response: String response from model
-            variables: List of target variables
-
-        Returns:
-            Dictionary of target variables and values
-        """
-        var_dict = {}
-        for lines in response.splitlines():
-            for var in variables:
-                if f'{var}:' in lines:
-                    var_dict[var] = lines.split(': ')[1].strip()
-        return var_dict
     
     def calc_cost(
         self, 
@@ -73,14 +51,7 @@ class BaseAgent(ABC):
             + MODEL_COST_PER_OUTPUT[model_name] * output_tokens
         )
         return cost
-    
-    def _extract_code(
-        self, 
-        algorithm_str: str,
-    ) -> str:
-        """Extract code from algorithm string."""
-        code = algorithm_str.split("```")[1][6:]
-    
+        
     @abstractmethod
     def _get_prompt(self) -> List[Dict[str, str]]:
         """
