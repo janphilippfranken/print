@@ -1,6 +1,6 @@
 from helpers import extract_code
 
-from printlm.improvers.base import BaseImprover
+from print.improvers.base import BaseImprover
 
 def improve_algorithm(initial_solution, utility, language_model):
 

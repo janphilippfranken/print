@@ -8,13 +8,13 @@ from experiments.apps.data import get_apps_dataset
 from helpers import extract_code
 
 # llm class
-from printlm.chat_models.azure import AsyncAzureChatLLM
+from print.chat_models.azure import AsyncAzureChatLLM
 
 # prompts 
-# from printlm.prompts.code.prompts import CODE_PROMPTS
-# from printlm.prompts.repair.prompts import REPAIR_PROMPTS
-# from printlm.prompts.feedback.prompts import FEEDBACK_PROMPTS
-# from printlm.prompts.task.prompts import TASK_PROMPTS
+# from printprompts.code.prompts import CODE_PROMPTS
+# from printprompts.repair.prompts import REPAIR_PROMPTS
+# from printprompts.feedback.prompts import FEEDBACK_PROMPTS
+# from printprompts.task.prompts import TASK_PROMPTS
 
 # get llm api class
 def get_llm(

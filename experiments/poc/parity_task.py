@@ -1,4 +1,4 @@
-from printlm.utility.base import BaseUtility
+from print.utility.base import BaseUtility
 
 "Utility Function As Code"
 import random
@@ -97,9 +97,13 @@ class ParityTask():
     def __init__(
         self, 
         utility, 
-        initial_solution,
     ) -> None:
         self.utility = utility
-        self.initial_solution = initial_solution
+        self.solutions = []
+    def add_solution(self, solution):
+        self.solutions.append(solution)
+    def get_solution(self, i: int = -1):
+        return self.solutions[i]
 
-parity_task = ParityTask(utility, algorithm_str)
+parity_task = ParityTask(utility)
+parity_task.add_solution(algorithm_str)

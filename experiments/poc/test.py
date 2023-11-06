@@ -1,5 +1,5 @@
-from printlm.language_agents.llm import LLMAgent
-from printlm.chat_models.azure import AsyncAzureChatLLM
+from print.language_agents.llm import LLMAgent
+from print.chat_models.azure import AsyncAzureChatLLM
 import os
 
 from parity_task import parity_task
@@ -20,10 +20,8 @@ language_model = LLMAgent(
     top_p=0.95, 
     n=1)
 
-
-
 improve_algorithm, improve_str = improver.get_improver()
 parity_task.utility.func, parity_task.utility.str = parity_task.utility.get_utility()
-result = improve_algorithm(parity_task.initial_solution, parity_task.utility, language_model)
+parity_task.add_solution(improve_algorithm(parity_task.get_solution, parity_task.utility, language_model))
 
-print(result)
+print(parity_task.solutions)

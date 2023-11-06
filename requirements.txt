@@ -1,7 +1,6 @@
-# pip install crfm-helm@git+https://github.com/stanford-crfm/helm.git@main # run this separately
-fire
-hydra-core
-langchain
-omegaconf
-tqdm
-openai
+# pip install crfm-helm@git+https://github.com/stanford-crfm/helm.git@main # run this separately if using crfm
+hydra-core==1.3.2
+langchain==0.0.331
+omegaconf==2.3.0
+tqdm==4.66.1
+openai==1.1.1

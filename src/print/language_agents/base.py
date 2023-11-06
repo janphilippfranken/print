@@ -6,7 +6,7 @@ from typing import (
 
 from abc import ABC, abstractmethod
 
-from printlm.language_agents.prices import MODEL_COST_PER_INPUT, MODEL_COST_PER_OUTPUT
+from print.language_agents.prices import MODEL_COST_PER_INPUT, MODEL_COST_PER_OUTPUT
 
 
 class BaseAgent(ABC):

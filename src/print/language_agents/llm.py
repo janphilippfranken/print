@@ -8,8 +8,8 @@ import asyncio
 
 import pickle
 
-from printlm.chat_models.azure import AsyncAzureChatLLM
-from printlm.language_agents.base import BaseAgent
+from print.chat_models.azure import AsyncAzureChatLLM
+from print.language_agents.base import BaseAgent
 
 
 class LLMAgent(BaseAgent):
@@ -86,7 +86,7 @@ class LLMAgent(BaseAgent):
         response = await self.get_response(messages=messages, temperature=temperature)
         # Get Cost
         cost = self.calc_cost(response=response)
-        print(f"Cost: {cost}")
+        print(f"Cost for running {self.model_args['model']}: {cost}")
         # Store response including cost 
         full_response = {
             'response': response,

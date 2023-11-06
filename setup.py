@@ -4,11 +4,11 @@ with open("requirements.txt", "r") as file:
     requirements = file.read().splitlines()
 
 setuptools.setup(
-    name="printlm",
+    name="print",
     version="0.0.1",
-    author="printlm",
-    author_email="printlm",
-    description="printlm: a simulator for learning ai constitutions with meta-prompt",
+    author="print",
+    author_email="print",
+    description="print",
     package_dir={"": "src"},
     packages=setuptools.find_packages(where="src"),
     classifiers=[
@@ -18,7 +18,4 @@ setuptools.setup(
     ],
     python_requires='>=3.8.1,<4.0',
     install_requires=requirements,
-    dependency_links=[
-        "git+https://github.com/stanford-crfm/helm.git@main#egg=helm", # requirements may crash for helm
-    ],
 )
