@@ -11,10 +11,10 @@ from typing import (
 import random
 
 def extract_code(
-        algorithm_str: str,
+        algorithm_strs: List[str],
     ) -> str:
         """Extract code from algorithm string."""
-        code = algorithm_str.split("```")[1][6:]
+        code = [algorithm_str.split("```")[1][6:] for algorithm_str in algorithm_strs]
         return code
 
 def evaluate_code(
