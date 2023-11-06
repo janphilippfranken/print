@@ -7,7 +7,7 @@ from improve import improver
 from helpers import extract_code
 
 llm = AzureChatLLM(azure_endpoint="https://philipp.openai.azure.com/",
-                   api_key="",
+                   api_key=os.getenv("OPENAI_API_KEY"),
                    api_version="2023-05-15")
 
 

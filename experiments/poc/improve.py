@@ -10,25 +10,21 @@ def improve_algorithm(initial_solution, utility, language_model):
 ```python
 {initial_solution}
 ```
+
 You will be evaluated based on this score function:
 ```python
 {utility.str}
 ```
 You must return an improved solution. Be as creative as you can under the constraints.
 Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it."""
-    new_solutions = []
-    for _ in range(language_model.budget):
-        new_solution = language_model.run(expertise=expertise, message=message)
-        new_solution = extract_code(new_solution) 
-        new_solutions.append(new_solution)
+    new_solutions = language_model.batch_prompt(expertise, [message] * language_model.budget)
+    new_solutions = extract_code(new_solutions)
     best_solution = max(new_solutions, key=lambda x: utility.func(x))
     return best_solution
 
-improve_str = """from helpers import extract_code
+improve_str = """def improve_algorithm(initial_solution, utility, language_model):
 
-def improve_algorithm(initial_solution, utility, language_model):
-
-    ""Improves a solution according to a utility function.""
+    "Improves a solution according to a utility function."
     
     expertise = "You are an expert computer science researcher and programmer, especially skilled at optimizing algorithms."
 
@@ -36,17 +32,15 @@ def improve_algorithm(initial_solution, utility, language_model):
 ```python
 {initial_solution}
 ```
+
 You will be evaluated based on this score function:
 ```python
 {utility.str}
 ```
 You must return an improved solution. Be as creative as you can under the constraints.
-Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it.\"\"\"
-    new_solutions = []
-    for _ in range(language_model.budget):
-        new_solution = language_model.run(expertise=expertise, message=message)
-        new_solution = extract_code(new_solution) 
-        new_solutions.append(new_solution)
+Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it\"\"\"
+    new_solutions = language_model.batch_prompt(expertise, [message] * language_model.budget)
+    new_solutions = extract_code(new_solutions)
     best_solution = max(new_solutions, key=lambda x: utility.func(x))
     return best_solution"""
 

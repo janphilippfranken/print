@@ -96,13 +96,13 @@ class LLMAgent(BaseAgent):
         # Return str response
         return response.choices[0].message.content
     
-    async def batch_prompt(
+    async def batch_prompt_sync(
         self, 
         expertise: str, 
         messages: List[str],
         temperature: float = 0.7,
     ) -> List[str]:
-        """Allows for async API calls
+        """Handles async API calls for batch prompting.
 
         Args:
             expertise (str): The system message to use
@@ -111,5 +111,27 @@ class LLMAgent(BaseAgent):
         Returns:
             A list of responses from the code model for each message
         """
-        responses = [self.run(expertise, message, temperature) for message in messages]
-        return await asyncio.gather(*responses)
+        tasks = [self.run(expertise, message, temperature) for message in messages]
+        return await asyncio.gather(*tasks)
+
+    def batch_prompt(
+        self, 
+        expertise: str, 
+        messages: List[str], 
+        temperature: float = 0.7,
+    ) -> List[str]:
+        """=
+        Synchronous wrapper for batch_prompt.
+
+        Args:
+            expertise (str): The system message to use
+            messages (List[str]): A list of user messages
+            temperature (str): The temperature to use for the API call
+
+        Returns:
+            A list of responses from the code model for each message
+        """
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            raise RuntimeError(f"Loop is already running.")
+        return loop.run_until_complete(self.batch_prompt_sync(expertise, messages, temperature))
