@@ -1,13 +1,12 @@
 import numpy as np
 
-# Define a simple algorithm to solve for the true bits using Gaussian elimination in GF(2)
-def gaussian_elimination_GF2(matrix, outcomes):
+
+def algorithm(train_samples, train_parity, test_samples):
     # Get the number of variables
-    n = matrix.shape[1]
+    n = train_samples.shape[1]
 
     # Augment the matrix with the outcomes
-    aug_matrix = np.hstack((matrix, outcomes.reshape(-1, 1)))
-    
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
 
     # Perform Gaussian elimination
     for i in range(n):
@@ -27,11 +26,14 @@ def gaussian_elimination_GF2(matrix, outcomes):
                     aug_matrix[j] = (aug_matrix[j] + aug_matrix[i]) % 2
 
     # Back substitution
-    solution = np.zeros(n, dtype=int)
+    true_bits = np.zeros(n, dtype=int)
     for i in reversed(range(n)):
-        solution[i] = aug_matrix[i, n]
+        true_bits[i] = aug_matrix[i, n]
         for j in range(i + 1, n):
             if aug_matrix[i, j] == 1:
-                solution[i] ^= solution[j]
+                true_bits[i] ^= true_bits[j]
+
+    # Compute the parity of the solution
+    test_parity = np.sum(true_bits * test_samples, axis=1) % 2
                 
-    return solution
+    return test_parity
