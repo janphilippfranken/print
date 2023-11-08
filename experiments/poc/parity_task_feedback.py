@@ -14,7 +14,7 @@ def utility_func(algorithm_str: str):
     n_tests = 3
     average_correct = 0
     all_outputs = ""
-
+    string_io = io.StringIO() 
     try:
         exec(algorithm_str, globals())
     except Exception as e:
@@ -35,38 +35,31 @@ def utility_func(algorithm_str: str):
         test_samples = samples[n_train_samples:]
         test_parity = parity[n_train_samples:]
 
-        # Redirect standard output and standard error to capture prints and errors
-        old_stdout = sys.stdout
-        old_stderr = sys.stderr
-        sys.stdout = sys.stderr = string_io = io.StringIO()
+
+
+        # Redirect standard output and standard error
+        old_stdout, old_stderr = sys.stdout, sys.stderr
+        sys.stdout = sys.stderr = string_io
 
         try:
             predictions = algorithm(train_samples, train_parity, test_samples)
             correct = np.sum(predictions == test_parity) / n_test_samples
         except Exception as e:
             all_outputs += f"Error: {e}\n"
-            all_outputs += string_io.getvalue()
-            # Reset standard output and error to their original values
-            sys.stdout = old_stdout
-            sys.stderr = old_stderr
             break  # Break the loop on error
         finally:
-            # Add any print outputs to the all_outputs string
             all_outputs += string_io.getvalue()
-            # Reset standard output and error to their original values
-            sys.stdout = old_stdout
-            sys.stderr = old_stderr
+            string_io.seek(0)  # Clear buffer for next iteration
+            string_io.truncate()
+            sys.stdout, sys.stderr = old_stdout, old_stderr
+
 
         average_correct += correct / n_tests
     
     return average_correct, all_outputs
 
 "Utility Function As String"
-utility_str = """import numpy as np
-import io
-import sys
-
-def utility_func(algorithm_str: str):
+utility_str = """def utility_func(algorithm_str: str):
     ""
     Implements the parity learning task. Returns the number of correct predictions,
     along with the output of print statements and error messages.
@@ -75,7 +68,7 @@ def utility_func(algorithm_str: str):
     n_tests = 3
     average_correct = 0
     all_outputs = ""
-
+    string_io = io.StringIO() 
     try:
         exec(algorithm_str, globals())
     except Exception as e:
@@ -96,27 +89,24 @@ def utility_func(algorithm_str: str):
         test_samples = samples[n_train_samples:]
         test_parity = parity[n_train_samples:]
 
-        # Redirect standard output and standard error to capture prints and errors
-        old_stdout = sys.stdout
-        old_stderr = sys.stderr
-        sys.stdout = sys.stderr = string_io = io.StringIO()
+
+
+        # Redirect standard output and standard error
+        old_stdout, old_stderr = sys.stdout, sys.stderr
+        sys.stdout = sys.stderr = string_io
 
         try:
             predictions = algorithm(train_samples, train_parity, test_samples)
             correct = np.sum(predictions == test_parity) / n_test_samples
         except Exception as e:
             all_outputs += f"Error: {e}\n"
-            all_outputs += string_io.getvalue()
-            # Reset standard output and error to their original values
-            sys.stdout = old_stdout
-            sys.stderr = old_stderr
             break  # Break the loop on error
         finally:
-            # Add any print outputs to the all_outputs string
             all_outputs += string_io.getvalue()
-            # Reset standard output and error to their original values
-            sys.stdout = old_stdout
-            sys.stderr = old_stderr
+            string_io.seek(0)  # Clear buffer for next iteration
+            string_io.truncate()
+            sys.stdout, sys.stderr = old_stdout, old_stderr
+
 
         average_correct += correct / n_tests
     

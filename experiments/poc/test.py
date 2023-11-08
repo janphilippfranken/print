@@ -48,7 +48,7 @@ You will be evaluated based on this score function:
 ```
 
 The score of the current solution is {utility.func(initial_solution)[0]}.
-Error messages / print statements returned from the current solution are: {utility.func(initial_solution)[1]}.
+
 
 You must better understand the problems with the current solution by inserting print statements to debug the solution. The output of these print statements will be used to fix the solution using a language model. Return the full function including your edits."""
     debug_solutions = language_model.batch_prompt(expertise, [debug_message] * language_model.budget)
