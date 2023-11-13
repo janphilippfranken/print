@@ -2,7 +2,7 @@ from print.language_agents.llm import LLMAgent
 from print.chat_models.azure import AsyncAzureChatLLM
 import os
 
-from parity_task_feedback import parity_task_feedback
+from gpt_task_feedback import gpt_task_feedback
 from improve import improver
 
 
@@ -19,14 +19,14 @@ language_model = LLMAgent(
     budget=1, 
     model_id="1", 
     model="gpt-4",
-    max_tokens=1000, 
+    max_tokens=2000, 
     temperature=0.7, 
     top_p=0.95, 
     n=1)
 
 improve_algorithm, improve_str = improver.get_improver()
-parity_task_feedback.utility.func, parity_task_feedback.utility.str = parity_task_feedback.utility.get_utility()
-initial_solution = parity_task_feedback.get_solution()
+gpt_task_feedback.utility.func, gpt_task_feedback.utility.str = gpt_task_feedback.utility.get_utility()
+initial_solution = gpt_task_feedback.get_solution()
 
 from helpers import extract_code
 
@@ -118,6 +118,6 @@ You must improve the current solution. Use hints and be as creative as you can u
     return best_solution
 
 
-best_sol, best_debug_sol = improve_algorithm(parity_task_feedback.get_solution(), parity_task_feedback.utility, language_model)
+best_sol, best_debug_sol = improve_algorithm(gpt_task_feedback.get_solution(), gpt_task_feedback.utility, language_model)
 print(best_sol)
 print(best_debug_sol)
