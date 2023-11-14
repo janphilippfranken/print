@@ -3,18 +3,13 @@ from omegaconf import DictConfig
 from tqdm import tqdm
 import os
 
-from experiments.apps.data import get_apps_dataset
- 
 from helpers import extract_code
 
 # llm class
 from print.chat_models.azure import AsyncAzureChatLLM
 
-# prompts 
-# from printprompts.code.prompts import CODE_PROMPTS
-# from printprompts.repair.prompts import REPAIR_PROMPTS
-# from printprompts.feedback.prompts import FEEDBACK_PROMPTS
-# from printprompts.task.prompts import TASK_PROMPTS
+# taks
+from print.task.tasks import TASKS
 
 # get llm api class
 def get_llm(
@@ -26,7 +21,11 @@ def get_llm(
         return llm
     else:
         print(f"ERROR: {args.model.api} is not a valid API (yet)")
-        
+
+
+
+
+
 # run 
 @hydra.main(version_base=None, config_path="config", config_name="config")
 def main(args: DictConfig) -> None:
@@ -34,8 +33,11 @@ def main(args: DictConfig) -> None:
     # get llm(s)
     args.model.azure_api.api_key = os.getenv("OPENAI_API_KEY")
     is_azure = args.api_name
-    
-    raise NotImplementedError
+
+    task = TASKS[args.task.task_id]
+    print(task.task_id)
+    print(task.initial_solution)
+    # raise NotImplementedError
 
 if __name__ == '__main__':
     main()

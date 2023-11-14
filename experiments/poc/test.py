@@ -2,7 +2,7 @@ from print.language_agents.llm import LLMAgent
 from print.chat_models.azure import AsyncAzureChatLLM
 import os
 
-from parity_task_feedback import parity_task_feedback
+from experiments.poc.parity_task import parity_task_feedback
 from improve import improver
 
 
@@ -86,37 +86,6 @@ You must improve the current solution. Use hints and be as creative as you can u
     best_debug_solution = debug_solutions[best_solution_index]
     return best_solution, best_debug_solution
 
-
-def improve_algorithm_2(initial_solution, utility, language_model):
-
-    """Improves a solution according to a utility function."""
-    
-    expertise = "You are an expert computer science researcher and programmer, especially skilled at optimizing algorithms."
-   
-    
-    repair_message = f"""You are given the following solution to a problem:
-
-```python
-{initial_solution}
-```
-
-You will be evaluated based on this score function:
-```python
-{utility.str}
-```
-
-The score of the current solution is {utility.func(initial_solution)[0]}.
-
-You must improve the current solution. Use hints and be as creative as you can under the constraints. Return the full solution including your edits."""
- 
-    repair_solutions = language_model.batch_prompt(expertise, [repair_message] * language_model.budget)
-    print(repair_solutions[0])
-    repair_solutions = extract_code(repair_solutions)
-    # Find the best solution and its index
-
-    best_solution_index, best_solution = max(enumerate(repair_solutions), key=lambda x: utility.func(x[1])[0])
-    # Retrieve the corresponding debug solution
-    return best_solution
 
 
 best_sol, best_debug_sol = improve_algorithm(parity_task_feedback.get_solution(), parity_task_feedback.utility, language_model)

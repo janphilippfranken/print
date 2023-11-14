@@ -29,5 +29,5 @@ model:
     top_p: 1
     n: 1
 
-data:
-  difficulty: "introductory"
+task:
+  task_id: "parity_without_noise"
