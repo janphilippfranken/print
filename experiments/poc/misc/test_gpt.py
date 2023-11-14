@@ -2,7 +2,7 @@ from print.language_agents.llm import LLMAgent
 from print.chat_models.azure import AsyncAzureChatLLM
 import os
 
-from parity_task_feedback import parity_task_feedback
+from gpt_task_feedback import gpt_task_feedback
 from improve import improver
 
 
@@ -25,14 +25,16 @@ language_model = LLMAgent(
     n=1)
 
 improve_algorithm, improve_str = improver.get_improver()
-parity_task_feedback.utility.func, parity_task_feedback.utility.str = parity_task_feedback.utility.get_utility()
-initial_solution = parity_task_feedback.get_solution()
+gpt_task_feedback.utility.func, gpt_task_feedback.utility.str = gpt_task_feedback.utility.get_utility()
+initial_solution = gpt_task_feedback.get_solution()
 
 from helpers import extract_code
 
 
+
+
 def improve_algorithm(initial_solution, utility, language_model):
-    print('improving')
+
 
     """Improves a solution according to a utility function."""
     
@@ -48,12 +50,15 @@ You will be evaluated based on this score function:
 {utility.str}
 ```
 
-The score of the current solution is {utility.func(initial_solution)[0]}.
+The loss of the current solution is {utility.func(initial_solution)[0]} (lower is better).
 
 
-You must better understand the problems with the current solution by inserting print statements to debug the solution. The output of these print statements will be used to fix the solution using a language model. Return the full function including your edits."""
+You must better understand the problems with the current solution by inserting print statements to debug the solution. The output of these print statements will be used to fix the solution using a language model. 
+Return the full function including your edits. You can input multiple statements to see where the code breaks and what the variables look like!
+The return will be used for downstream improvement."""
     debug_solutions = language_model.batch_prompt(expertise, [debug_message] * language_model.budget)
     debug_solutions = extract_code(debug_solutions)
+
     
     repair_message_template = """You are given the following solution to a problem:
 
@@ -65,27 +70,37 @@ You will be evaluated based on this score function:
 ```python
 {utility_str}
 ```
+Hints about the code collected from print statements you may find useful: 
 
-The score of the current solution is {initial_score}.
-Hints you may find useful: {debug_output}.
+print_statements:
+```python
+{debug_solution}
+```
+
+print_outputs:
+{debug_output}.
 
 You must improve the current solution. Use hints and be as creative as you can under the constraints."""
     repair_messages = [repair_message_template.format(
         initial_solution=initial_solution,
         utility_str=utility.str,
         initial_score=utility.func(initial_solution)[0],
+        debug_solution=debug_solution,
         debug_output=utility.func(debug_solution)[1],
         ) for debug_solution in debug_solutions]
-
     
     repair_solutions = language_model.batch_prompt(expertise, repair_messages)
     repair_solutions = extract_code(repair_solutions)
-    # Find the best solution and its index
     best_solution_index, best_solution = max(enumerate(repair_solutions), key=lambda x: utility.func(x[1])[0])
+    
     # Retrieve the corresponding debug solution
     best_debug_solution = debug_solutions[best_solution_index]
+
     return best_solution, best_debug_solution
 
+
+
+best_sol, best_debug_sol = improve_algorithm(gpt_task_feedback.get_solution(), gpt_task_feedback.utility, language_model)
 
 def improve_algorithm_2(initial_solution, utility, language_model):
 
@@ -118,9 +133,15 @@ You must improve the current solution. Use hints and be as creative as you can u
     # Retrieve the corresponding debug solution
     return best_solution
 
+best_sol2 = improve_algorithm(gpt_task_feedback.get_solution(), gpt_task_feedback.utility, language_model)
 
-best_sol, best_debug_sol = improve_algorithm(parity_task_feedback.get_solution(), parity_task_feedback.utility, language_model)
-best_sol2 = improve_algorithm_2(parity_task_feedback.get_solution(), parity_task_feedback.utility, language_model)
+
+import sys
+
+# Reset sys.stdout to its default value, which is the console
+sys.stdout = sys.__stdout__
+
 print(best_sol)
 print(best_debug_sol)
 print(best_sol2)
+
