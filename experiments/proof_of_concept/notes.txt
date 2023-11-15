@@ -1,0 +1,13 @@
+- come up with experiments that test interesting questions in code? 
+- learn smth/find smth novel
+- interesting problem: discover smth novel; scientific discovery
+- what is a discovery? 
+- human still defines constraints/search space
+- v1: write abstract of paper; have gpt-4 rate its own abstract;
+    - feedback: gpt-4 feedback on abstract
+    - average abstracts get better;
+- v2: 
+    - flash-attention does not change outputs; but is better for model
+
+- v3: just revert to scai
+ - build models that serve people
