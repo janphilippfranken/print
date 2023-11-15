@@ -20,81 +20,156 @@ def algorithm(train_samples, train_parity, test_samples):
             if aug_matrix[i, j] == 1:
                 true_bits[i] ^= true_bits[j]
     test_parity = np.sum(true_bits + test_samples, axis=1) % 2
-    return test_parity",0.0,0,0,
-1,improver,1,0.04521,"
-import numpy as np
+    return test_parity",0.0,0,0,"import numpy as np
 
-def optimized_algorithm(train_samples, train_parity, test_samples):
+def algorithm(train_samples, train_parity, test_samples):
     n = train_samples.shape[1]
-    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
-
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
     for i in range(n):
-        pivot = np.flatnonzero(aug_matrix[i:, i])  # Find all nonzero elements in the column
-        if pivot.size != 0:
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
             pivot_row = pivot[0] + i
             if pivot_row != i:
                 aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity"
+1,improver,1,0.12741,def algorithm(*args): return 0,0.5166666666666666,0,0,"
+import numpy as np
 
-            # Vectorized row operation
-            rows_to_update = np.flatnonzero(aug_matrix[i + 1:, i]) + i + 1
-            aug_matrix[rows_to_update] ^= aug_matrix[i]
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    print(""Initial augmented matrix: "", aug_matrix)
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        print(f""Pivot for row {i}: "", pivot)
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            print(""Pivot row: "", pivot_row)
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            print(""Augmented matrix after swapping rows: "", aug_matrix)
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+            print(""Augmented matrix after row operations: "", aug_matrix)
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+        print(""True bits after iteration: "", true_bits)
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    print(""Final test parity: "", test_parity)
+    return test_parity
+"
+2,improver,2,0.23739,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n_features = train_samples.shape[1]
+    weights = np.zeros(n_features)
+
+    # Training phase
+    for _ in range(1000):  # Maximum number of epochs
+        for sample, parity in zip(train_samples, train_parity):
+            prediction = int(np.dot(sample, weights) > 0)
+            if prediction != parity:
+                if prediction == 0:
+                    weights += sample
+                else:
+                    weights -= sample
+
+    # Testing phase
+    predictions = np.dot(test_samples, weights) > 0
+    return predictions.astype(int)
+",0.7,0,0,"
+
+import numpy as np
+
+def algorithm_optimized(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    print(""Initial augmented matrix: "", aug_matrix)  # checking the initial state of the matrix
+
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        print(f""Pivot at iteration {i}: "", pivot)  # checking the pivot at each iteration
+
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            mask = aug_matrix[i + 1:, i] == 1
+            aug_matrix[i + 1:][mask] = (aug_matrix[i + 1:][mask] - aug_matrix[i]) % 2
+        print(f""Augmented matrix after iteration {i}: "", aug_matrix)  # checking the matrix after each iteration
 
     true_bits = np.zeros(n, dtype=int)
     for i in reversed(range(n)):
-        true_bits[i] = aug_matrix[i, n] ^ np.sum(aug_matrix[i, i+1:n] * true_bits[i+1:n])
+        true_bits[i] = aug_matrix[i, n] ^ np.sum(aug_matrix[i, i + 1:n] * true_bits[i + 1:], axis=0)
+        print(f""True bits after iteration {i}: "", true_bits)  # checking the true bits after each iteration
 
     test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    print(""Final test parity: "", test_parity)  # checking the final test parity
     return test_parity
-",0.0,0,0,
-2,improver,2,0.09426,"
+
+"
+3,improver,3,0.37100999999999995,"
 import numpy as np
-from multiprocessing import Pool
 
-def row_operation(row):
-    return row ^ aug_matrix[i]
+def algorithm(train_samples, train_parity, test_samples):
+    n_features = train_samples.shape[1]
+    weights = np.zeros(n_features)
+    learning_rate = 0.1
+    margin = 0.5
 
-def optimized_algorithm(train_samples, train_parity, test_samples):
+    # Training phase
+    for _ in range(1000):  # Maximum number of epochs
+        for sample, parity in zip(train_samples, train_parity):
+            prediction = int(np.dot(sample, weights) > 0)
+            confidence = np.abs(np.dot(sample, weights))
+            
+            if prediction != parity or confidence < margin:
+                update = learning_rate * (parity - prediction) * sample
+                weights += update
+
+    # Testing phase
+    predictions = np.dot(test_samples, weights) > 0
+    return predictions.astype(int)
+",0.6166666666666666,0,0,"
+
+import numpy as np
+
+def algorithm_optimized(train_samples, train_parity, test_samples):
     n = train_samples.shape[1]
-    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
-
+    print(f""Number of columns in train_samples: {n}"")
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    print(f""Augmented Matrix shape: {aug_matrix.shape}"")
     for i in range(n):
-        pivot = np.flatnonzero(aug_matrix[i:, i])  # Find all nonzero elements in the column
-        if pivot.size != 0:
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        print(f""Finding pivot for column {i}, Pivot found at: {pivot}"")
+        if pivot.size > 0:
             pivot_row = pivot[0] + i
-            if pivot_row != i:
-                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
-
-            # Vectorized row operation
-            rows_to_update = np.flatnonzero(aug_matrix[i + 1:, i]) + i + 1
-            with Pool() as p:
-                aug_matrix[rows_to_update] = p.map(row_operation, aug_matrix[rows_to_update])
-
+            print(f""Swapping row {i} with pivot row {pivot_row}"")
+            aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            mask = aug_matrix[i + 1:, i] == 1
+            print(f""Mask for XOR operation: {mask}"")
+            aug_matrix[i + 1:][mask] ^= aug_matrix[i]
     true_bits = np.zeros(n, dtype=int)
-    true_bits = np.bitwise_xor(aug_matrix[:, n], np.dot(aug_matrix[:, :n], true_bits))
-
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n] ^ np.sum(aug_matrix[i, i + 1:n] & true_bits[i + 1:], axis=0)
+        print(f""True bits after iteration {i}: {true_bits}"")
     test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    print(f""Test Parity: {test_parity}"")
     return test_parity
-",0.0,0,0,
-3,improver,3,0.14127,"
-
-import numpy as np
-
-def optimized_algorithm(train_samples, train_parity, test_samples):
-    n = train_samples.shape[1]
-    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
-
-    # Gaussian elimination
-    for i in range(n):
-        pivot = np.flatnonzero(aug_matrix[i:, i]) 
-        if pivot.size != 0:
-            pivot_row = pivot[0] + i
-            if pivot_row != i:
-                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
-
-            aug_matrix[i + 1:] -= np.outer(aug_matrix[i + 1:, i] / aug_matrix[i, i], aug_matrix[i])
-
-    true_bits = np.linalg.solve(aug_matrix[:, :n], aug_matrix[:, n])
-
-    test_parity = np.mod(np.dot(test_samples, true_bits), 2)
-    return test_parity
-",0.0,0,0,
+"

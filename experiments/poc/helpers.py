@@ -59,4 +59,14 @@ def save_data(
     # plot
     plot_utility(df=combined_df, data_dir=data_dir, sim_id=sim_id)
     plot_cost(df=combined_df, data_dir=data_dir, sim_id=sim_id)
+
+def update_dict(data_dict, key, value):
+    """
+    Update the dictionary with the provided key and value.
+    If the key does not exist in the dictionary, it handles the error.
+    """
+    if key in data_dict:
+        data_dict[key].append(value)
+    else:
+        raise KeyError(f"Key {key} not found in the dictionary")
     

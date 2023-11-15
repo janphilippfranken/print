@@ -15,7 +15,7 @@ from print.language_agents.llm import LLMAgent
 from print.chat_models.azure import AsyncAzureChatLLM
 
 # helpers and plots
-from helpers import extract_code, save_data
+from helpers import extract_code, save_data, update_dict
 
 # improve algorithms
 from improver import improve_algorithm
@@ -63,7 +63,7 @@ def main(args: DictConfig) -> None:
         'utility': [initial_utility],
         'utility_error': [0],
         'cost_error': [0],
-        'modified_solutions': [None] * (args.sim.n_runs + 1),
+        'modified_solutions': [initial_solution],
     }
     
     # print improver
@@ -76,7 +76,7 @@ def main(args: DictConfig) -> None:
         'utility': [initial_utility],
         'utility_error': [0],
         'cost_error': [0],
-        'modified_solutions': [None] * (args.sim.n_runs + 1),
+        'modified_solutions': [initial_solution],
     }
 
     # main inner loop using the scaffold program to find improved solution to the task and evaluating these solutions
@@ -90,42 +90,27 @@ def main(args: DictConfig) -> None:
             improver_data['improvements'].append(sim + 1)
             improver_data['utility_error'].append(0)
             improver_data['cost_error'].append(0)
-            # improver_data['utility'].append(task.utility.func(improved_solution)[0])
-
-
-            print_improver_data['cost'].append(np.random.uniform(0, 1))
-            print_improver_data['solutions'].append(initial_solution)
-            print_improver_data['utility'].append(np.random.uniform(0, 1))
+            
+            modified_solutions = insert_prints(print_improver_data['solutions'][-1], print_improve_language_model)
+            print_returns = generate_print_returns(modified_solutions, task.utility) # evaluate modified code to get print returns
+            print_improved_solution, modified_solution_idx = print_improve_algorithm(print_improver_data['solutions'][-1], print_returns, task.utility, print_improve_language_model) # llm call 2: improve solution using print returns
+            print_improver_data['cost'].append(print_improve_language_model.total_inference_cost)
+            print_improver_data['solutions'].append(print_improved_solution)
+            improver_data['modified_solutions'].append(modified_solutions[modified_solution_idx])
+            print_improver_data['modified_solutions'].append(modified_solutions[modified_solution_idx])
+            print_improver_data['utility'].append(task.utility.func(print_improved_solution)[0])
             print_improver_data['improvements'].append(sim + 1)
-            print_improver_data['utility_error'].append(0.1)
-            print_improver_data['cost_error'].append(0.1)
+            print_improver_data['utility_error'].append(0)
+            print_improver_data['cost_error'].append(0)
 
-        
-
-
-
-        # else: 
-        #     # improve solution using generic stop-like scaffold
-        #     improver_cost.append(improve_language_model.total_inference_cost)
-        #     improved_solution = improve_algorithm(improver_solutions[-1], task.utility, improve_language_model)
-        #     improver_solutions.append(improved_solution)
-        #     improver_utility.append(task.utility.func(improved_solution)[0])
-        #     # improve solution using print improver
-        #     print_improver_cost.append(print_improve_language_model.total_inference_cost)
-        #     modified_solutions = insert_prints(print_improver_solutions[-1], print_improve_language_model)
-        #     print_returns = generate_print_returns(modified_solutions, task.utility) # evaluate modified code to get print returns
-        #     print_improved_solution, modified_solution = print_improve_algorithm(modified_solutions, print_returns, task.utility, print_improve_language_model) # llm call 2: improve solution using print returns
-        #     best_modified_solutions.append(modified_solution)
-        #     print_improver_solutions.append(print_improved_solution)
-        #     print_improver_utility.append(task.utility.func(print_improved_solution)[0])
-
-        # store results as csvs
+       
         print('total cost', improve_language_model.total_inference_cost)
         # 
 
     # save and plot data 
+    # breakpoint()
     save_data(improver_data=improver_data, 
-              print_improver_data=print_improver_data, 
+              print_improver_data=print_improver_data,
               data_dir=DATA_DIR, 
               sim_id=args.sim.sim_id)
 

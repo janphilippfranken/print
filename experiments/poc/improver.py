@@ -17,8 +17,11 @@ You will be evaluated based on this score function:
 ```
 
 You must return an improved solution. Be as creative as you can under the constraints.
-Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it."""
-    solutions = language_model.batch_prompt(expertise, [message] * language_model.budget)
+Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it. You algorithm has to run within max of 2 seconds and you are not allwed to use external libraries besides numpy."""
+    try:
+        solutions = language_model.batch_prompt(expertise, [message] * language_model.budget)
+    except:
+        solutions = ["Fail" for _ in range(language_model.budget)]
     solutions = extract_code(solutions)
     best_solution = max(solutions, key=lambda solution: utility.func(solution)[0])
     return best_solution
