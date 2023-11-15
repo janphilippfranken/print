@@ -20,5 +20,5 @@ You must return an improved solution. Be as creative as you can under the constr
 Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it."""
     solutions = language_model.batch_prompt(expertise, [message] * language_model.budget)
     solutions = extract_code(solutions)
-    _, best_solution = max(enumerate(solutions), key=lambda x: utility.func(x[1])[0])
+    best_solution = max(solutions, key=lambda solution: utility.func(solution)[0])
     return best_solution

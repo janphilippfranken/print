@@ -1,7 +1,7 @@
 
 from helpers import extract_code
 
-def insert_debug_prints(initial_solution, language_model):
+def insert_prints(initial_solution, language_model):
     """
     Enhances a given solution by inserting print statements for debugging.
     """
@@ -30,7 +30,7 @@ def generate_print_returns(modified_solutions, utility):
     
     return print_outputs
 
-def improve_algorithm_with_hints(modified_solutions, hints, utility, language_model):
+def print_improve_algorithm(modified_solutions, hints, utility, language_model):
     """
     Improves a solution according to a utility function and debug hints, and returns the best improvement along with the corresponding hint.
     """
@@ -51,5 +51,4 @@ Your primary improvement must be novel and non-trivial. First, propose an idea, 
     solutions = language_model.batch_prompt(expertise, messages)
     solutions = extract_code(solutions)
     best_solution_index, best_solution = max(enumerate(solutions), key=lambda x: utility.func(x[1])[0])
-
-    return messages[best_solution_index], best_solution
+    return best_solution, modified_solutions[best_solution_index]

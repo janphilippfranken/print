@@ -1,33 +1,27 @@
 hydra:
   run:
-    dir: .
-
-api_name: "azure" 
+    dir: runs/${sim.sim_dir}
 
 model:
+  api_type: "azure"
   azure_api:
     api_key: ""
     azure_endpoint: "https://philipp.openai.azure.com/"
     api_version: "2023-05-15"
-    api_type: "azure"
-  code:
+  llm:
+    budget: 1
+    model_id: 1
     model: "gpt-4"
-    max_tokens: 150
-    temperature: 0
-    top_p: 1
-    n: 1
-  feedback:
-    model: "gpt-4"
-    max_tokens: 150
-    temperature: 0
-    top_p: 1
-    n: 1
-  repair:
-    model: "gpt-4"
-    max_tokens: 150
-    temperature: 0
-    top_p: 1
+    max_tokens: 2000
+    temperature: 0.7
+    top_p: 0.95
     n: 1
 
 task:
   task_id: "parity_without_noise"
+
+sim:
+  sim_dir: "parity_without_noise"
+  sim_id: "parity_without_noise_1"
+  n_runs: 3
+  verbose: True

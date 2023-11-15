@@ -26,6 +26,8 @@ class LLMAgent(BaseAgent):
         super().__init__(llm, model_id)
         self.budget = budget
         self.model_args = model_args
+        self.all_responses = []
+        self.total_inference_cost = 0
 
     def get_prompt(
         self,
@@ -51,19 +53,6 @@ class LLMAgent(BaseAgent):
         """
         self.model_args['temperature'] = temperature
         return await self.llm(messages=messages, **self.model_args)
-    
-    def store_response(
-        self, 
-        response: Any,
-    ) -> None:
-        """
-        Writes the full response object to a file.
-        """
-        try:
-            with open(f"{self.model_id}.pkl", "wb") as f:
-                pickle.dump(response, f)
-        except Exception as e:
-            print(f"Error occurred while saving the response: {e}")
     
     async def run(
         self, 
@@ -93,9 +82,11 @@ class LLMAgent(BaseAgent):
             'response_str': response.choices[0].message.content,
             'cost': cost
         }
-        self.store_response(response=full_response)
-        # Return str response
-        return response.choices[0].message.content
+        # Update total cost and store response
+        self.total_inference_cost += cost
+        self.all_responses.append(full_response)
+        # Return response_string
+        return full_response['response_str']
     
     async def batch_prompt_sync(
         self, 
@@ -112,8 +103,8 @@ class LLMAgent(BaseAgent):
         Returns:
             A list of responses from the code model for each message
         """
-        tasks = [self.run(expertise, message, temperature) for message in messages]
-        return await asyncio.gather(*tasks)
+        responses = [self.run(expertise, message, temperature) for message in messages]
+        return await asyncio.gather(*responses)
 
     def batch_prompt(
         self, 

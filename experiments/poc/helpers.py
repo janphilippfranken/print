@@ -11,12 +11,18 @@ from typing import (
 import random
 
 import numpy as np
+import pandas as pd
+
+from plot import plot_utility, plot_cost
 
 def extract_code(
         algorithm_strs: List[str],
     ) -> str:
         """Extract code from algorithm string."""
-        code = [algorithm_str.split("```")[1][6:] for algorithm_str in algorithm_strs]
+        try:
+            code = [algorithm_str.split("```")[1][6:] for algorithm_str in algorithm_strs]
+        except:
+             code = ["def algorithm(*args): return 0" for algorithm_str in algorithm_strs]
         return code
 
 def generate_parity_data(
@@ -33,3 +39,24 @@ def generate_parity_data(
     masked_samples = samples * true_bits
     parity = np.sum(masked_samples, axis=1) % 2
     return samples, parity
+
+def save_data(
+    improver_data,
+    print_improver_data,
+    data_dir,
+    sim_id,
+    ) -> None:
+    """
+    Saves data to csvs and plots.
+    """
+    # save csvs
+    improver_df = pd.DataFrame(improver_data)
+    print_imrpover_df = pd.DataFrame(print_improver_data)
+    improver_df.to_csv(f'{data_dir}/{sim_id}_improver.csv')
+    print_imrpover_df.to_csv(f'{data_dir}/{sim_id}_print_improver.csv')
+    combined_df = pd.concat([improver_df, print_imrpover_df])
+    combined_df.to_csv(f'{data_dir}/{sim_id}_combined.csv')
+    # plot
+    plot_utility(df=combined_df, data_dir=data_dir, sim_id=sim_id)
+    plot_cost(df=combined_df, data_dir=data_dir, sim_id=sim_id)
+    

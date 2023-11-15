@@ -5,7 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from train_gpt import train_gpt
+from experiments.poc.misc.train_gpt import train_gpt
 
 def utility_func(algorithm_str: str):
     """
