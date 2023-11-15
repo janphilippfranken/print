@@ -99,7 +99,7 @@ import numpy as np
 
 def algorithm(train_samples, train_parity, test_samples):
     n = train_samples.shape[1]
-    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
     for i in range(n):
         pivot = np.where(aug_matrix[i:, i] == 1)[0]
         if len(pivot) > 0:

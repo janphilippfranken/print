@@ -12,9 +12,9 @@ def plot_utility(df, data_dir, sim_id):
 
     plt.figure(figsize=(10, 5))
 
-    # add error 
-    df['utility_upper'] = df['utility'] + df['utility_error']
-    df['utility_lower'] = df['utility'] - df['utility_error']
+    # # add error 
+    # df['utility_upper'] = df['utility'] + df['utility_error']
+    # df['utility_lower'] = df['utility'] - df['utility_error']
 
 
     # Plotting error areas with corresponding line colors
@@ -24,7 +24,7 @@ def plot_utility(df, data_dir, sim_id):
         data = df[df['model'] == model]
         plt.scatter(data=data, x="improvements", y="utility", marker='o', color=colors[i])
         plt.plot(data['improvements'], df[df['model'] == model]['utility'], color=colors[i])
-        plt.fill_between(data['improvements'], data['utility_lower'], data['utility_upper'], alpha=0.1, color=colors[i])
+        # plt.fill_between(data['improvements'], data['utility_lower'], data['utility_upper'], alpha=0.1, color=colors[i])
 
 
     # Set ticks for x and y axis
@@ -61,8 +61,8 @@ def plot_cost(df, data_dir, sim_id):
     plt.figure(figsize=(10, 5))
 
     # add error 
-    df['cost_upper'] = df['cost'] + df['cost_error']
-    df['cost_lower'] = df['cost'] - df['cost_error']
+    # df['cost_upper'] = df['cost'] + df['cost_error']
+    # df['cost_lower'] = df['cost'] - df['cost_error']
 
 
     # Plotting error areas with corresponding line colors
@@ -72,7 +72,7 @@ def plot_cost(df, data_dir, sim_id):
         data = df[df['model'] == model]
         plt.scatter(data=data, x="improvements", y="cost", marker='o', color=colors[i])
         plt.plot(data['improvements'], df[df['model'] == model]['cost'], color=colors[i])
-        plt.fill_between(data['improvements'], data['cost_lower'], data['cost_upper'], alpha=0.1, color=colors[i])
+        # plt.fill_between(data['improvements'], data['cost_lower'], data['cost_upper'], alpha=0.1, color=colors[i])
 
 
     # Set ticks for x and y axis

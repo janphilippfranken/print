@@ -33,23 +33,28 @@ def generate_print_returns(modified_solutions, utility):
     return print_outputs
 
 def print_improve_algorithm(initial_solution, hints, utility, language_model):
-    """
-    Improves a solution according to a utility function and debug hints, and returns the best improvement along with the corresponding hint.
-    """
+    """Improves a solution according to a utility function."""
     
     expertise = "You are an expert computer science researcher and programmer, especially skilled at optimizing algorithms."
-
-    message_template = """You are given the following solution to a problem:
+   
+    message = """You are given the following solution to a problem:
 
 ```python
 {initial_solution}
 ```
 
-Print returns from previous debugging of initial solution: {debug_output}.
+You will be evaluated based on this score function:
+```python
+{utility_str}
+```
 
-You must return an improved solution. Be as creative as you can under the constraints.
-Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it. You algorithm has to run within max of 2 seconds and you are not allwed to use external libraries besides numpy."""
-    messages = [message_template.format(initial_solution=initial_solution, debug_output=hint) for hint in hints]
+You should consider the following information from debugging the solution:
+{debug_output}
+
+Considering the initial solution and debugging information, you must return an improved solution. Be as creative as you can under the constraints.
+Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it. 
+You algorithm has to run within max of 2 seconds and you are not allwed to use external libraries besides numpy."""
+    messages = [message.format(initial_solution=initial_solution, utility_str=utility.str, debug_output=hint) for hint in hints]
     try:
         solutions = language_model.batch_prompt(expertise, messages)
     except:
