@@ -22,6 +22,6 @@ task:
 
 sim:
   sim_dir: "parity_without_noise"
-  sim_id: "parity_without_noise_1"
+  sim_id: "parity_without_noise_test"
   n_runs: 3
   verbose: False

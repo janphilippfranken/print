@@ -60,7 +60,7 @@ def main(args: DictConfig) -> None:
         'improvements': np.arange(args.sim.n_runs + 1),
         'cost': [0], 
         'solutions': [initial_solution], 
-        'utility': [initial_utility],
+        'utility': [task.utility.func(initial_solution)[0]],
     }
     
     # print improver
@@ -69,8 +69,9 @@ def main(args: DictConfig) -> None:
         'improvements': np.arange(args.sim.n_runs + 1),
         'cost': [0], 
         'solutions': [initial_solution], 
-        'utility': [initial_utility],
+        'utility': [task.utility.func(initial_solution)[0]],
         'modified_solutions': [initial_solution],
+        'print_returns': ['None'],
     }
 
     # main inner loop using the scaffold program to find improved solution to the task and evaluating these solutions
@@ -80,7 +81,9 @@ def main(args: DictConfig) -> None:
             breakpoint()
         else:
             # generate improved solution using improver 
-            improved_solution = improve_algorithm(improver_data['solutions'][-1], task.utility, improve_language_model)
+            improved_solution = improve_algorithm(improver_data['solutions'][-1], 
+                                                  task.utility, 
+                                                  improve_language_model)
             # append results 
             improver_data['cost'].append(improve_language_model.total_inference_cost)
             improver_data['solutions'].append(improved_solution)
@@ -89,12 +92,16 @@ def main(args: DictConfig) -> None:
             # generate improved solution using print improver
             modified_solutions = insert_prints(print_improver_data['solutions'][-1], print_improve_language_model)
             print_returns = generate_print_returns(modified_solutions, task.utility) # evaluate modified code to get print returns
-            print_improved_solution, modified_solution_idx = print_improve_algorithm(print_improver_data['solutions'][-1], print_returns, task.utility, print_improve_language_model) # llm call 2: improve solution using print returns
+            print_improved_solution, modified_solution_idx = print_improve_algorithm(print_improver_data['solutions'][-1], 
+                                                                                     print_returns, 
+                                                                                     task.utility, 
+                                                                                     print_improve_language_model) # llm call 2: improve solution using print returns
             # append results
             print_improver_data['cost'].append(print_improve_language_model.total_inference_cost)
             print_improver_data['solutions'].append(print_improved_solution)
             print_improver_data['utility'].append(task.utility.func(print_improved_solution)[0])
             print_improver_data['modified_solutions'].append(modified_solutions[modified_solution_idx])
+            print_improver_data['print_returns'].append(print_returns[modified_solution_idx])
 
     # save and plot data 
     save_data(improver_data=improver_data, 

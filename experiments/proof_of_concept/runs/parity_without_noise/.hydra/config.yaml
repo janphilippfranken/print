@@ -16,6 +16,6 @@ task:
   task_id: parity_without_noise
 sim:
   sim_dir: parity_without_noise
-  sim_id: parity_without_noise_3
+  sim_id: parity_without_noise_1
   n_runs: 3
   verbose: false

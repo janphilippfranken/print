@@ -13,10 +13,7 @@ def insert_prints(initial_solution, language_model):
 ```
 Your task is to insert print statements at strategic points in the code to help identify potential issues or bugs. 
 Focus on areas where errors are likely to occur or where the flow of data needs to be tracked. Return the modified code with your print statements included. Important: While you should include multiple print statments, you should be careful to not print more than eg. 20 lines of output as there is a constraint to use no more than 1000 characters of feedback overall!"""
-    try:
-        solutions = language_model.batch_prompt(expertise, [message] * language_model.budget)
-    except:
-        solutions = ["Fail" for _ in range(language_model.budget)]
+    solutions = language_model.batch_prompt(expertise, [message] * language_model.budget)        
     modified_solutions = extract_code(solutions)
 
     return modified_solutions
@@ -58,7 +55,7 @@ You algorithm has to run within max of 2 seconds and you are not allwed to use e
     try:
         solutions = language_model.batch_prompt(expertise, messages)
     except:
-        solutions = ["Fail" for _ in range(language_model.budget)]
+        return "None", 0
     solutions = extract_code(solutions)
     best_solution_index, best_solution = max(enumerate(solutions), key=lambda x: utility.func(x[1])[0])
     return best_solution, best_solution_index

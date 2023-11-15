@@ -1,0 +1,93 @@
+,model,improvements,cost,solutions,utility,modified_solutions
+0,print_improver,0,0.0,"import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity",0.0,"import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity"
+1,print_improver,1,0.42744,def algorithm(*args): return 0,0.4833333333333333,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    print(""Initial augmented matrix:\n"", aug_matrix)
+
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            print(f""After row swapping at index {i}:\n"", aug_matrix)
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+            print(f""After row reduction at index {i}:\n"", aug_matrix)
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+    print(""True bits calculated from the matrix:\n"", true_bits)
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    print(""Final test parity:\n"", test_parity)
+    return test_parity
+"
+2,print_improver,2,0.51417,None,0.5333333333333333,"
+def algorithm(*args):
+    print(f""Function called with {len(args)} arguments."")
+    for i, arg in enumerate(args):
+        print(f""Argument {i+1}: {arg}"")
+    return 0
+"
+3,print_improver,3,0.7463399999999999,"
+def hamming_distance(a, b):
+    return np.sum(a != b, axis=1)
+
+def algorithm(train_samples, train_parity, test_samples):
+    predictions = []
+    for test_sample in test_samples:
+        distances = hamming_distance(train_samples, test_sample)
+        nearest_parity = train_parity[np.argmin(distances)]
+        predictions.append(nearest_parity)
+    return np.array(predictions)
+",0.7333333333333333,def algorithm(*args): return 0

@@ -129,18 +129,18 @@ hydra:
   runtime:
     version: 1.3.2
     version_base: '1.3'
-    cwd: /Users/iphilipp/Documents/research/print/experiments/poc
+    cwd: /Users/iphilipp/Documents/research/print/experiments/proof_of_concept
     config_sources:
     - path: hydra.conf
       schema: pkg
       provider: hydra
-    - path: /Users/iphilipp/Documents/research/print/experiments/poc/config
+    - path: /Users/iphilipp/Documents/research/print/experiments/proof_of_concept/config
       schema: file
       provider: main
     - path: ''
       schema: structured
       provider: schema
-    output_dir: /Users/iphilipp/Documents/research/print/experiments/poc/runs/parity_without_noise
+    output_dir: /Users/iphilipp/Documents/research/print/experiments/proof_of_concept/runs/parity_without_noise
     choices:
       hydra/env: default
       hydra/callbacks: null
