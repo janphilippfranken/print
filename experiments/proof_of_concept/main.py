@@ -15,7 +15,7 @@ from print.language_agents.llm import LLMAgent
 from print.chat_models.azure import AsyncAzureChatLLM
 
 # helpers and plots
-from helpers import extract_code, save_data, update_dict
+from helpers import save_data
 
 # improve algorithms
 from improver import improve_algorithm
@@ -77,7 +77,7 @@ def main(args: DictConfig) -> None:
     }
 
     # main inner loop using the scaffold program to find improved solution to the task and evaluating these solutions
-    for sim in tqdm(range(args.sim.n_runs)):
+    for _ in tqdm(range(args.sim.n_runs)):
 
         if args.sim.verbose:
             breakpoint()
@@ -87,10 +87,12 @@ def main(args: DictConfig) -> None:
                                                   task.utility, 
                                                   improve_language_model)
             # append results 
-            if task.utility.func(improved_solution)[0] > improver_data['utility'][-1]:
+            improved_utility = task.utility.func(improved_solution)[0]
+            if improved_utility > improver_data['utility'][-1]:
+                print(improved_utility, improver_data['utility'][-1])
                 improver_data['cost'].append(improve_language_model.total_inference_cost)
                 improver_data['solutions'].append(improved_solution)
-                improver_data['utility'].append(task.utility.func(improved_solution)[0])
+                improver_data['utility'].append(improved_utility)
                 improver_data['average_utility'].append(average_improved_utility)
             else:
                 improver_data['cost'].append(improve_language_model.total_inference_cost)
@@ -101,13 +103,21 @@ def main(args: DictConfig) -> None:
             # generate improved solution using print improver
             modified_solutions = insert_prints(print_improver_data['solutions'][-1], print_improve_language_model)
             print_returns = generate_print_returns(modified_solutions, task.utility) # evaluate modified code to get print returns
-            # breakpoint()
-            print_improved_solution, modified_solution_idx, average_print_improved_utility = print_improve_algorithm(print_improver_data['solutions'][-1], modified_solutions, print_returns,  task.utility, print_improve_language_model) # llm call 2: improve solution using print returns
+
+
+            
+            print_improved_solution, modified_solution_idx, average_print_improved_utility = print_improve_algorithm(print_improver_data['solutions'][-1], 
+                                                                                                                     modified_solutions, 
+                                                                                                                     print_returns,  
+                                                                                                                     task.utility, 
+                                                                                                                     print_improve_language_model) # llm call 2: improve solution using print returns
             # append results
-            if task.utility.func(print_improved_solution)[0] > print_improver_data['utility'][-1]:
+            print_improved_utility = task.utility.func(print_improved_solution)[0]
+            if print_improved_utility > print_improver_data['utility'][-1]:
+                print(print_improved_utility, print_improver_data['utility'][-1])
                 print_improver_data['cost'].append(print_improve_language_model.total_inference_cost)
                 print_improver_data['solutions'].append(print_improved_solution)
-                print_improver_data['utility'].append(task.utility.func(print_improved_solution)[0])
+                print_improver_data['utility'].append(print_improved_utility)
                 print_improver_data['modified_solutions'].append(modified_solutions[modified_solution_idx])
                 print_improver_data['print_returns'].append(print_returns[modified_solution_idx])
                 print_improver_data['average_utility'].append(average_print_improved_utility)
