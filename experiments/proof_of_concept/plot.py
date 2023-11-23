@@ -71,7 +71,7 @@ def plot_average_utility(df, data_dir, sim_id):
     for i, model in enumerate(df['model'].unique()):
         data = df[df['model'] == model]
         plt.scatter(data=data, x="improvements", y="average_utility", marker='o', color=colors[i])
-        plt.plot(data['improvements'], df[df['model'] == model]['utility'], color=colors[i])
+        plt.plot(data['improvements'], df[df['model'] == model]['average_utility'], color=colors[i])
         # plt.fill_between(data['improvements'], data['utility_lower'], data['utility_upper'], alpha=0.1, color=colors[i])
 
 

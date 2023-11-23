@@ -22,7 +22,7 @@ You algorithm has to run within max of 2 seconds and you are not allwed to use e
     try:
         solutions = language_model.batch_prompt(expertise, [message] * language_model.budget)
     except:
-        return ""
+        return "", 0
     solutions = extract_code(solutions)
     best_solution = max(solutions, key=lambda solution: utility.func(solution)[0])
     average_utility = sum([utility.func(solution)[0] for solution in solutions]) / len(solutions)

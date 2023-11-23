@@ -101,12 +101,8 @@ def main(args: DictConfig) -> None:
             # generate improved solution using print improver
             modified_solutions = insert_prints(print_improver_data['solutions'][-1], print_improve_language_model)
             print_returns = generate_print_returns(modified_solutions, task.utility) # evaluate modified code to get print returns
-            breakpoint()
-            print_improved_solution, modified_solution_idx, average_print_improved_utility, = print_improve_algorithm(print_improver_data['solutions'][-1], 
-                                                                                     modified_solutions,
-                                                                                     print_returns, 
-                                                                                     task.utility, 
-                                                                                     print_improve_language_model) # llm call 2: improve solution using print returns
+            # breakpoint()
+            print_improved_solution, modified_solution_idx, average_print_improved_utility = print_improve_algorithm(print_improver_data['solutions'][-1], modified_solutions, print_returns,  task.utility, print_improve_language_model) # llm call 2: improve solution using print returns
             # append results
             if task.utility.func(print_improved_solution)[0] > print_improver_data['utility'][-1]:
                 print_improver_data['cost'].append(print_improve_language_model.total_inference_cost)
