@@ -93,3 +93,4 @@ best_sol2 = improve_algorithm_2(parity_task_feedback.get_solution(), parity_task
 print(best_sol)
 print(best_debug_sol)
 print(best_sol2)
+

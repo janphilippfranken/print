@@ -30,6 +30,6 @@ task:
 
 sim:
   sim_dir: "parity_without_noise"
-  sim_id: "run_0"
+  sim_id: "run_1"
   n_runs: 5
   verbose: False

@@ -1,5 +1,7 @@
 from helpers import extract_code
 
+import numpy as np
+
 def improve_algorithm(initial_solution, utility, language_model):
     """Improves a solution according to a utility function."""
     
@@ -25,5 +27,6 @@ You algorithm has to run within max of 2 seconds and you are not allwed to use e
         return "", 0
     solutions = extract_code(solutions)
     best_solution = max(solutions, key=lambda solution: utility.func(solution)[0])
-    average_utility = sum([utility.func(solution)[0] for solution in solutions]) / len(solutions)
+    average_utility = np.mean([utility.func(solution)[0] for solution in solutions]) 
+    print([utility.func(solution)[0] for solution in solutions])
     return best_solution, average_utility

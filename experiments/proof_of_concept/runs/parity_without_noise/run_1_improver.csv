@@ -1,0 +1,64 @@
+,model,improvements,cost,solutions,utility,average_utility
+0,improver,0,0.0,"import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity",0.0,0.0
+1,improver,1,0.23321999999999998,def algorithm(*args): return 0,0.55,0.5133333333333334
+2,improver,2,0.41535,def algorithm(*args): return 0,0.55,0.5133333333333334
+3,improver,3,0.5953199999999998,def algorithm(*args): return 0,0.55,0.5133333333333334
+4,improver,4,0.7773299999999999,"
+def algorithm(train_samples, train_parity, test_samples):
+    # Create a lookup table with size 2^n_bits
+    n_bits = train_samples.shape[1]
+    lookup_table = np.zeros(2**n_bits, dtype=int)
+
+    # Fill the lookup table
+    for sample, parity in zip(train_samples, train_parity):
+        index = int(''.join(map(str, sample)), 2)
+        lookup_table[index] = parity
+
+    # Make predictions
+    predictions = []
+    for sample in test_samples:
+        index = int(''.join(map(str, sample)), 2)
+        predictions.append(lookup_table[index])
+
+    return np.array(predictions)
+",0.7,0.3733333333333333
+5,improver,5,1.0111199999999998,"
+def algorithm(train_samples, train_parity, test_samples):
+    # Create a lookup table with size 2^n_bits
+    n_bits = train_samples.shape[1]
+    lookup_table = np.zeros(2**n_bits, dtype=int)
+
+    # Fill the lookup table
+    for sample, parity in zip(train_samples, train_parity):
+        index = int(''.join(map(str, sample)), 2)
+        lookup_table[index] = parity
+
+    # Make predictions
+    predictions = []
+    for sample in test_samples:
+        index = int(''.join(map(str, sample)), 2)
+        predictions.append(lookup_table[index])
+
+    return np.array(predictions)
+",0.7,0.3733333333333333

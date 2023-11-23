@@ -125,8 +125,8 @@ def plot_cost(df, data_dir, sim_id):
 
     # Set ticks for x and y axis
     plt.xticks(ticks=df['improvements'], fontsize=15)
-    plt.ylim(-0.05, 5)
-    plt.yticks(ticks=[0, 0.25, 0.5, 0.75, 1.0], fontsize=15)
+    plt.ylim(-0.05, 3.05)
+    plt.yticks(ticks=[0, 1.0, 2.0, 3.0], fontsize=15)
 
 
     plt.xlabel('N Improvements', fontsize=20, labelpad=5)

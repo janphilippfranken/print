@@ -87,6 +87,7 @@ def main(args: DictConfig) -> None:
                                                   task.utility, 
                                                   improve_language_model)
             # append results 
+            print(average_improved_utility)
             improved_utility = task.utility.func(improved_solution)[0]
             if improved_utility > improver_data['utility'][-1]:
                 print(improved_utility, improver_data['utility'][-1])

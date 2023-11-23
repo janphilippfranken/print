@@ -1,6 +1,8 @@
 
 from helpers import extract_code
 
+import numpy as np
+
 def insert_prints(initial_solution, language_model):
     """
     Enhances a given solution by inserting print statements for debugging.
@@ -63,5 +65,6 @@ You algorithm has to run within max of 2 seconds and you are not allwed to use e
         return "None", 0, 0
     solutions = extract_code(solutions)
     best_solution_index, best_solution = max(enumerate(solutions), key=lambda x: utility.func(x[1])[0])
-    average_utility = sum([utility.func(solution)[0] for solution in solutions]) / len(solutions)
+    average_utility = np.mean([utility.func(solution)[0] for solution in solutions]) 
+    print([utility.func(solution)[0] for solution in solutions])
     return best_solution, best_solution_index, average_utility
