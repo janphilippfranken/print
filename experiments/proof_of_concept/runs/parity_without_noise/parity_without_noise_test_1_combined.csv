@@ -1,0 +1,5281 @@
+,model,improvements,cost,solutions,utility,modified_solutions,print_returns
+0,improver,0,0.0,"import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity",0.0,,
+1,improver,1,0.24491999999999997,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+
+    # Gaussian elimination
+    for i in range(n):
+        if aug_matrix[i, i] == 0:  # pivot is zero, skip to next row
+            continue
+        for j in range(i + 1, len(aug_matrix)):
+            if aug_matrix[j, i] == 1:
+                np.bitwise_xor(aug_matrix[j], aug_matrix[i], out=aug_matrix[j])
+
+    # Back substitution and calculating test parity
+    true_bits = np.zeros(n, dtype=int)
+    test_parity = np.zeros(len(test_samples), dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n] ^ np.sum(aug_matrix[i, i+1:n] & true_bits[i+1:])
+        test_parity ^= test_samples[:, i] & true_bits[i]
+
+    return test_parity
+",0.5499999999999999,,
+2,improver,2,0.48822000000000004,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+
+    # Gauss-Jordan elimination
+    for i in range(n):
+        max_el = np.abs(aug_matrix[i:, i]).argmax() + i
+        if aug_matrix[max_el, i] == 0:  # pivot is zero, skip to next row
+            continue
+        aug_matrix[[i, max_el]] = aug_matrix[[max_el, i]]  # swap rows
+        for j in range(i+1, len(aug_matrix)):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+        for j in range(i):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+
+    # Calculating test parity
+    true_bits = aug_matrix[:, n].astype(int)
+    test_parity = np.zeros(len(test_samples), dtype=int)
+    for i in range(n):
+        test_parity ^= test_samples[:, i] & true_bits[i]
+
+    return test_parity
+",1.0,,
+3,improver,3,0.7191299999999999,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+
+    # Gauss-Jordan elimination
+    for i in range(n):
+        max_el = np.abs(aug_matrix[i:, i]).argmax() + i
+        if aug_matrix[max_el, i] == 0:  # pivot is zero, skip to next row
+            continue
+        aug_matrix[[i, max_el]] = aug_matrix[[max_el, i]]  # swap rows
+        for j in range(i+1, len(aug_matrix)):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+        for j in range(i):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+
+    # Calculating test parity
+    true_bits = aug_matrix[:, n].astype(int)
+    test_parity = np.zeros(len(test_samples), dtype=int)
+    for i in range(n):
+        test_parity ^= test_samples[:, i] & true_bits[i]
+
+    return test_parity
+",1.0,,
+4,improver,4,0.9398400000000001,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+
+    # Gauss-Jordan elimination
+    for i in range(n):
+        max_el = np.abs(aug_matrix[i:, i]).argmax() + i
+        if aug_matrix[max_el, i] == 0:  # pivot is zero, skip to next row
+            continue
+        aug_matrix[[i, max_el]] = aug_matrix[[max_el, i]]  # swap rows
+        for j in range(i+1, len(aug_matrix)):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+        for j in range(i):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+
+    # Calculating test parity
+    true_bits = aug_matrix[:, n].astype(int)
+    test_parity = np.zeros(len(test_samples), dtype=int)
+    for i in range(n):
+        test_parity ^= test_samples[:, i] & true_bits[i]
+
+    return test_parity
+",1.0,,
+5,improver,5,1.1696700000000002,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+
+    # Gauss-Jordan elimination
+    for i in range(n):
+        max_el = np.abs(aug_matrix[i:, i]).argmax() + i
+        if aug_matrix[max_el, i] == 0:  # pivot is zero, skip to next row
+            continue
+        aug_matrix[[i, max_el]] = aug_matrix[[max_el, i]]  # swap rows
+        for j in range(i+1, len(aug_matrix)):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+        for j in range(i):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+
+    # Calculating test parity
+    true_bits = aug_matrix[:, n].astype(int)
+    test_parity = np.zeros(len(test_samples), dtype=int)
+    for i in range(n):
+        test_parity ^= test_samples[:, i] & true_bits[i]
+
+    return test_parity
+",1.0,,
+6,improver,6,1.4149200000000004,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+
+    # Gauss-Jordan elimination
+    for i in range(n):
+        max_el = np.abs(aug_matrix[i:, i]).argmax() + i
+        if aug_matrix[max_el, i] == 0:  # pivot is zero, skip to next row
+            continue
+        aug_matrix[[i, max_el]] = aug_matrix[[max_el, i]]  # swap rows
+        for j in range(i+1, len(aug_matrix)):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+        for j in range(i):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+
+    # Calculating test parity
+    true_bits = aug_matrix[:, n].astype(int)
+    test_parity = np.zeros(len(test_samples), dtype=int)
+    for i in range(n):
+        test_parity ^= test_samples[:, i] & true_bits[i]
+
+    return test_parity
+",1.0,,
+7,improver,7,1.6424700000000005,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+
+    # Gauss-Jordan elimination
+    for i in range(n):
+        max_el = np.abs(aug_matrix[i:, i]).argmax() + i
+        if aug_matrix[max_el, i] == 0:  # pivot is zero, skip to next row
+            continue
+        aug_matrix[[i, max_el]] = aug_matrix[[max_el, i]]  # swap rows
+        for j in range(i+1, len(aug_matrix)):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+        for j in range(i):
+            if aug_matrix[j, i] != 0:
+                aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+
+    # Calculating test parity
+    true_bits = aug_matrix[:, n].astype(int)
+    test_parity = np.zeros(len(test_samples), dtype=int)
+    for i in range(n):
+        test_parity ^= test_samples[:, i] & true_bits[i]
+
+    return test_parity
+",1.0,,
+0,print_improver,0,0.0,"import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity",0.0,"import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity",None
+1,print_improver,1,0.5042099999999999,"import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity",0.0,"import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity",None
+2,print_improver,2,1.0053600000000003,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+
+    for i in range(n):
+        pivot_row = i
+        while pivot_row < len(aug_matrix) and aug_matrix[pivot_row, i] != 1:
+            pivot_row += 1
+
+        if pivot_row != len(aug_matrix):  # if we found a pivot
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity
+",0.5833333333333333,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    print(f'Number of columns in train_samples: {n}')
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    print(f'Shape of augmented matrix: {aug_matrix.shape}')
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        print(f'Pivot for column {i}: {pivot}')
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            print(f'Pivot row: {pivot_row}')
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+                    print(f'After operation, row {j} of aug_matrix: {aug_matrix[j]}')
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        print(f'True bits after step {i}: {true_bits}')
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+                print(f'True bits after XOR operation in step {i}: {true_bits}')
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    print(f'Test parity: {test_parity}') 
+    return test_parity
+","Number of columns in train_samples: 10
+Number of columns in train_samples: 10
+Number of columns in train_samples: 10"
+3,print_improver,3,1.1940000000000004,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+
+    for i in range(n):
+        pivot_row = i
+        while pivot_row < len(aug_matrix) and aug_matrix[pivot_row, i] != 1:
+            pivot_row += 1
+
+        if pivot_row != len(aug_matrix):  # if we found a pivot
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity
+",0.5833333333333333,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    print(f'Number of columns in train_samples: {n}')
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    print(f'Shape of augmented matrix: {aug_matrix.shape}')
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        print(f'Pivot for column {i}: {pivot}')
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            print(f'Pivot row: {pivot_row}')
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+                    print(f'After operation, row {j} of aug_matrix: {aug_matrix[j]}')
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        print(f'True bits after step {i}: {true_bits}')
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+                print(f'True bits after XOR operation in step {i}: {true_bits}')
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    print(f'Test parity: {test_parity}') 
+    return test_parity
+","Number of columns in train_samples: 10
+Number of columns in train_samples: 10
+Number of columns in train_samples: 10"
+4,print_improver,4,1.3845600000000002,None,0.5333333333333333,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    print('Start of algorithm')
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+    print('Augmented matrix shape:', aug_matrix.shape)
+
+    for i in range(n):
+        pivot_row = i
+        while pivot_row < len(aug_matrix) and aug_matrix[pivot_row, i] != 1:
+            pivot_row += 1
+        print(f'Pivot row for i={i}:', pivot_row)
+
+        if pivot_row != len(aug_matrix):  # if we found a pivot
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+                print(f'Swapped rows {i} and {pivot_row}')
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+                    print(f'XOR operation at row {j}')
+
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+        print(f'True bits after iteration {i}:', true_bits)
+
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    print('Test parity:', test_parity)
+    print('End of algorithm')
+    return test_parity
+","Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 5
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 16
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=1: 3
+Swapped rows 1 and 3
+XOR operation at row 7
+XOR operation at row 9
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 30
+XOR operation at row 34
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 46
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=2: 4
+Swapped rows 2 and 4
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=3: 4
+Swapped rows 3 and 4
+XOR operation at row 10
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 70
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+Pivot row for i=4: 4
+XOR operation at row 7
+XOR operation at row 11
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 26
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 64
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 79
+Pivot row for i=5: 5
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+Pivot row for i=6: 6
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 27
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=7: 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=8: 10
+Swapped rows 8 and 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 43
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=9: 11
+Swapped rows 9 and 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 72
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 1 0 0]
+True bits after iteration 6: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 5: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 4: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 3: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 2: [0 0 1 0 0 0 1 1 0 0]
+True bits after iteration 1: [0 0 1 0 0 0 1 1 0 0]
+True bits after iteration 0: [0 0 1 0 0 0 1 1 0 0]
+Test parity: [0 1 0 1 0 1 1 0 1 1 1 0 0 1 1 1 0 0 1 0]
+End of algorithm
+Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 5
+XOR operation at row 6
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 15
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 65
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=1: 5
+Swapped rows 1 and 5
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+Pivot row for i=2: 4
+Swapped rows 2 and 4
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 33
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 56
+XOR operation at row 59
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=3: 3
+XOR operation at row 4
+XOR operation at row 5
+XOR operation at row 8
+XOR operation at row 12
+XOR operation at row 16
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 75
+XOR operation at row 79
+Pivot row for i=4: 4
+XOR operation at row 6
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 67
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=5: 7
+Swapped rows 5 and 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 57
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 75
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=6: 8
+Swapped rows 6 and 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=7: 16
+Swapped rows 7 and 16
+XOR operation at row 17
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=8: 9
+Swapped rows 8 and 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 35
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=9: 12
+Swapped rows 9 and 12
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 38
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 75
+XOR operation at row 78
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 6: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 5: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 4: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 3: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 2: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 1: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 0: [0 0 0 0 0 0 0 0 0 0]
+Test parity: [1 1 1 1 0 1 0 1 0 1 0 0 1 1 0 0 1 0 1 1]
+End of algorithm
+Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 3
+XOR operation at row 4
+XOR operation at row 5
+XOR operation at row 6
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 20
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+Pivot row for i=1: 1
+XOR operation at row 5
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 48
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 65
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=2: 2
+XOR operation at row 3
+XOR operation at row 4
+XOR operation at row 7
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 48
+XOR operation at row 54
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 68
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=3: 3
+XOR operation at row 5
+XOR operation at row 8
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=4: 6
+Swapped rows 4 and 6
+XOR operation at row 7
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=5: 5
+XOR operation at row 6
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 32
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=6: 7
+Swapped rows 6 and 7
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 48
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 78
+Pivot row for i=7: 7
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 56
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 77
+Pivot row for i=8: 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 14
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=9: 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 77
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 6: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 5: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 4: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 3: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 2: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 1: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 0: [0 0 0 0 0 1 0 0 1 0]
+Test parity: [0 1 1 0 0 1 1 0 0 1 1 1 0 1 1 0 1 1 1 0]
+End of algorithm"
+5,print_improver,5,1.6262100000000004,None,0.5333333333333333,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    print('Start of algorithm')
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+    print('Augmented matrix shape:', aug_matrix.shape)
+
+    for i in range(n):
+        pivot_row = i
+        while pivot_row < len(aug_matrix) and aug_matrix[pivot_row, i] != 1:
+            pivot_row += 1
+        print(f'Pivot row for i={i}:', pivot_row)
+
+        if pivot_row != len(aug_matrix):  # if we found a pivot
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+                print(f'Swapped rows {i} and {pivot_row}')
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+                    print(f'XOR operation at row {j}')
+
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+        print(f'True bits after iteration {i}:', true_bits)
+
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    print('Test parity:', test_parity)
+    print('End of algorithm')
+    return test_parity
+","Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 5
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 16
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=1: 3
+Swapped rows 1 and 3
+XOR operation at row 7
+XOR operation at row 9
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 30
+XOR operation at row 34
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 46
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=2: 4
+Swapped rows 2 and 4
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=3: 4
+Swapped rows 3 and 4
+XOR operation at row 10
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 70
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+Pivot row for i=4: 4
+XOR operation at row 7
+XOR operation at row 11
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 26
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 64
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 79
+Pivot row for i=5: 5
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+Pivot row for i=6: 6
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 27
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=7: 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=8: 10
+Swapped rows 8 and 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 43
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=9: 11
+Swapped rows 9 and 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 72
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 1 0 0]
+True bits after iteration 6: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 5: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 4: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 3: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 2: [0 0 1 0 0 0 1 1 0 0]
+True bits after iteration 1: [0 0 1 0 0 0 1 1 0 0]
+True bits after iteration 0: [0 0 1 0 0 0 1 1 0 0]
+Test parity: [0 1 0 1 0 1 1 0 1 1 1 0 0 1 1 1 0 0 1 0]
+End of algorithm
+Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 5
+XOR operation at row 6
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 15
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 65
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=1: 5
+Swapped rows 1 and 5
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+Pivot row for i=2: 4
+Swapped rows 2 and 4
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 33
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 56
+XOR operation at row 59
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=3: 3
+XOR operation at row 4
+XOR operation at row 5
+XOR operation at row 8
+XOR operation at row 12
+XOR operation at row 16
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 75
+XOR operation at row 79
+Pivot row for i=4: 4
+XOR operation at row 6
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 67
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=5: 7
+Swapped rows 5 and 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 57
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 75
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=6: 8
+Swapped rows 6 and 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=7: 16
+Swapped rows 7 and 16
+XOR operation at row 17
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=8: 9
+Swapped rows 8 and 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 35
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=9: 12
+Swapped rows 9 and 12
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 38
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 75
+XOR operation at row 78
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 6: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 5: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 4: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 3: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 2: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 1: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 0: [0 0 0 0 0 0 0 0 0 0]
+Test parity: [1 1 1 1 0 1 0 1 0 1 0 0 1 1 0 0 1 0 1 1]
+End of algorithm
+Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 3
+XOR operation at row 4
+XOR operation at row 5
+XOR operation at row 6
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 20
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+Pivot row for i=1: 1
+XOR operation at row 5
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 48
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 65
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=2: 2
+XOR operation at row 3
+XOR operation at row 4
+XOR operation at row 7
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 48
+XOR operation at row 54
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 68
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=3: 3
+XOR operation at row 5
+XOR operation at row 8
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=4: 6
+Swapped rows 4 and 6
+XOR operation at row 7
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=5: 5
+XOR operation at row 6
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 32
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=6: 7
+Swapped rows 6 and 7
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 48
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 78
+Pivot row for i=7: 7
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 56
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 77
+Pivot row for i=8: 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 14
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=9: 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 77
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 6: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 5: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 4: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 3: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 2: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 1: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 0: [0 0 0 0 0 1 0 0 1 0]
+Test parity: [0 1 1 0 0 1 1 0 0 1 1 1 0 1 1 0 1 1 1 0]
+End of algorithm"
+6,print_improver,6,1.8747600000000006,None,0.5333333333333333,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    print('Start of algorithm')
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+    print('Augmented matrix shape:', aug_matrix.shape)
+
+    for i in range(n):
+        pivot_row = i
+        while pivot_row < len(aug_matrix) and aug_matrix[pivot_row, i] != 1:
+            pivot_row += 1
+        print(f'Pivot row for i={i}:', pivot_row)
+
+        if pivot_row != len(aug_matrix):  # if we found a pivot
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+                print(f'Swapped rows {i} and {pivot_row}')
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+                    print(f'XOR operation at row {j}')
+
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+        print(f'True bits after iteration {i}:', true_bits)
+
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    print('Test parity:', test_parity)
+    print('End of algorithm')
+    return test_parity
+","Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 5
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 16
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=1: 3
+Swapped rows 1 and 3
+XOR operation at row 7
+XOR operation at row 9
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 30
+XOR operation at row 34
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 46
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=2: 4
+Swapped rows 2 and 4
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=3: 4
+Swapped rows 3 and 4
+XOR operation at row 10
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 70
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+Pivot row for i=4: 4
+XOR operation at row 7
+XOR operation at row 11
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 26
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 64
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 79
+Pivot row for i=5: 5
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+Pivot row for i=6: 6
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 27
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=7: 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=8: 10
+Swapped rows 8 and 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 43
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=9: 11
+Swapped rows 9 and 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 72
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 1 0 0]
+True bits after iteration 6: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 5: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 4: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 3: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 2: [0 0 1 0 0 0 1 1 0 0]
+True bits after iteration 1: [0 0 1 0 0 0 1 1 0 0]
+True bits after iteration 0: [0 0 1 0 0 0 1 1 0 0]
+Test parity: [0 1 0 1 0 1 1 0 1 1 1 0 0 1 1 1 0 0 1 0]
+End of algorithm
+Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 5
+XOR operation at row 6
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 15
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 65
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=1: 5
+Swapped rows 1 and 5
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+Pivot row for i=2: 4
+Swapped rows 2 and 4
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 33
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 56
+XOR operation at row 59
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=3: 3
+XOR operation at row 4
+XOR operation at row 5
+XOR operation at row 8
+XOR operation at row 12
+XOR operation at row 16
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 75
+XOR operation at row 79
+Pivot row for i=4: 4
+XOR operation at row 6
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 67
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=5: 7
+Swapped rows 5 and 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 57
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 75
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=6: 8
+Swapped rows 6 and 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=7: 16
+Swapped rows 7 and 16
+XOR operation at row 17
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=8: 9
+Swapped rows 8 and 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 35
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=9: 12
+Swapped rows 9 and 12
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 38
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 75
+XOR operation at row 78
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 6: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 5: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 4: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 3: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 2: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 1: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 0: [0 0 0 0 0 0 0 0 0 0]
+Test parity: [1 1 1 1 0 1 0 1 0 1 0 0 1 1 0 0 1 0 1 1]
+End of algorithm
+Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 3
+XOR operation at row 4
+XOR operation at row 5
+XOR operation at row 6
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 20
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+Pivot row for i=1: 1
+XOR operation at row 5
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 48
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 65
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=2: 2
+XOR operation at row 3
+XOR operation at row 4
+XOR operation at row 7
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 48
+XOR operation at row 54
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 68
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=3: 3
+XOR operation at row 5
+XOR operation at row 8
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=4: 6
+Swapped rows 4 and 6
+XOR operation at row 7
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=5: 5
+XOR operation at row 6
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 32
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=6: 7
+Swapped rows 6 and 7
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 48
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 78
+Pivot row for i=7: 7
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 56
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 77
+Pivot row for i=8: 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 14
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=9: 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 77
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 6: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 5: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 4: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 3: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 2: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 1: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 0: [0 0 0 0 0 1 0 0 1 0]
+Test parity: [0 1 1 0 0 1 1 0 0 1 1 1 0 1 1 0 1 1 1 0]
+End of algorithm"
+7,print_improver,7,2.111790000000001,None,0.5333333333333333,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    print('Start of algorithm')
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+    print('Augmented matrix shape:', aug_matrix.shape)
+
+    for i in range(n):
+        pivot_row = i
+        while pivot_row < len(aug_matrix) and aug_matrix[pivot_row, i] != 1:
+            pivot_row += 1
+        print(f'Pivot row for i={i}:', pivot_row)
+
+        if pivot_row != len(aug_matrix):  # if we found a pivot
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+                print(f'Swapped rows {i} and {pivot_row}')
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = np.bitwise_xor(aug_matrix[j], aug_matrix[i])
+                    print(f'XOR operation at row {j}')
+
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+        print(f'True bits after iteration {i}:', true_bits)
+
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    print('Test parity:', test_parity)
+    print('End of algorithm')
+    return test_parity
+","Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 5
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 16
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=1: 3
+Swapped rows 1 and 3
+XOR operation at row 7
+XOR operation at row 9
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 30
+XOR operation at row 34
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 46
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=2: 4
+Swapped rows 2 and 4
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=3: 4
+Swapped rows 3 and 4
+XOR operation at row 10
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 70
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+Pivot row for i=4: 4
+XOR operation at row 7
+XOR operation at row 11
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 26
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 64
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 79
+Pivot row for i=5: 5
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+Pivot row for i=6: 6
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 27
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=7: 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=8: 10
+Swapped rows 8 and 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 43
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=9: 11
+Swapped rows 9 and 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 72
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 1 0 0]
+True bits after iteration 6: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 5: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 4: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 3: [0 0 0 0 0 0 1 1 0 0]
+True bits after iteration 2: [0 0 1 0 0 0 1 1 0 0]
+True bits after iteration 1: [0 0 1 0 0 0 1 1 0 0]
+True bits after iteration 0: [0 0 1 0 0 0 1 1 0 0]
+Test parity: [0 1 0 1 0 1 1 0 1 1 1 0 0 1 1 1 0 0 1 0]
+End of algorithm
+Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 5
+XOR operation at row 6
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 15
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 65
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=1: 5
+Swapped rows 1 and 5
+XOR operation at row 6
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+Pivot row for i=2: 4
+Swapped rows 2 and 4
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 33
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 56
+XOR operation at row 59
+XOR operation at row 66
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=3: 3
+XOR operation at row 4
+XOR operation at row 5
+XOR operation at row 8
+XOR operation at row 12
+XOR operation at row 16
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 47
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 75
+XOR operation at row 79
+Pivot row for i=4: 4
+XOR operation at row 6
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 67
+XOR operation at row 71
+XOR operation at row 73
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=5: 7
+Swapped rows 5 and 7
+XOR operation at row 8
+XOR operation at row 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 57
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 75
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=6: 8
+Swapped rows 6 and 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 40
+XOR operation at row 43
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=7: 16
+Swapped rows 7 and 16
+XOR operation at row 17
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 42
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=8: 9
+Swapped rows 8 and 9
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 35
+XOR operation at row 37
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 60
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=9: 12
+Swapped rows 9 and 12
+XOR operation at row 15
+XOR operation at row 17
+XOR operation at row 18
+XOR operation at row 21
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 26
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 38
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 52
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 75
+XOR operation at row 78
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 6: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 5: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 4: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 3: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 2: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 1: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 0: [0 0 0 0 0 0 0 0 0 0]
+Test parity: [1 1 1 1 0 1 0 1 0 1 0 0 1 1 0 0 1 0 1 1]
+End of algorithm
+Start of algorithm
+Augmented matrix shape: (80, 11)
+Pivot row for i=0: 0
+XOR operation at row 1
+XOR operation at row 3
+XOR operation at row 4
+XOR operation at row 5
+XOR operation at row 6
+XOR operation at row 10
+XOR operation at row 12
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 20
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 30
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 46
+XOR operation at row 49
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 77
+XOR operation at row 78
+Pivot row for i=1: 1
+XOR operation at row 5
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 31
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 38
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 48
+XOR operation at row 51
+XOR operation at row 52
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 65
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=2: 2
+XOR operation at row 3
+XOR operation at row 4
+XOR operation at row 7
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 26
+XOR operation at row 28
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 48
+XOR operation at row 54
+XOR operation at row 58
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 68
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 76
+XOR operation at row 79
+Pivot row for i=3: 3
+XOR operation at row 5
+XOR operation at row 8
+XOR operation at row 11
+XOR operation at row 13
+XOR operation at row 14
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 46
+XOR operation at row 47
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 66
+XOR operation at row 71
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=4: 6
+Swapped rows 4 and 6
+XOR operation at row 7
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 21
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 34
+XOR operation at row 36
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 71
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 75
+XOR operation at row 77
+XOR operation at row 79
+Pivot row for i=5: 5
+XOR operation at row 6
+XOR operation at row 7
+XOR operation at row 8
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 14
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 27
+XOR operation at row 29
+XOR operation at row 32
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 56
+XOR operation at row 57
+XOR operation at row 60
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=6: 7
+Swapped rows 6 and 7
+XOR operation at row 13
+XOR operation at row 15
+XOR operation at row 18
+XOR operation at row 20
+XOR operation at row 23
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 32
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 42
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 48
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 57
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 67
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 76
+XOR operation at row 78
+Pivot row for i=7: 7
+XOR operation at row 15
+XOR operation at row 16
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 27
+XOR operation at row 28
+XOR operation at row 29
+XOR operation at row 30
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 40
+XOR operation at row 41
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 45
+XOR operation at row 46
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 52
+XOR operation at row 56
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 60
+XOR operation at row 62
+XOR operation at row 64
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 69
+XOR operation at row 72
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 77
+Pivot row for i=8: 8
+XOR operation at row 9
+XOR operation at row 10
+XOR operation at row 14
+XOR operation at row 18
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 24
+XOR operation at row 28
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 34
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 38
+XOR operation at row 39
+XOR operation at row 41
+XOR operation at row 43
+XOR operation at row 44
+XOR operation at row 50
+XOR operation at row 51
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 62
+XOR operation at row 63
+XOR operation at row 65
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 69
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 78
+XOR operation at row 79
+Pivot row for i=9: 9
+XOR operation at row 10
+XOR operation at row 11
+XOR operation at row 12
+XOR operation at row 17
+XOR operation at row 19
+XOR operation at row 20
+XOR operation at row 21
+XOR operation at row 22
+XOR operation at row 23
+XOR operation at row 25
+XOR operation at row 26
+XOR operation at row 31
+XOR operation at row 32
+XOR operation at row 33
+XOR operation at row 35
+XOR operation at row 36
+XOR operation at row 37
+XOR operation at row 42
+XOR operation at row 43
+XOR operation at row 47
+XOR operation at row 48
+XOR operation at row 49
+XOR operation at row 50
+XOR operation at row 52
+XOR operation at row 53
+XOR operation at row 54
+XOR operation at row 55
+XOR operation at row 58
+XOR operation at row 59
+XOR operation at row 61
+XOR operation at row 63
+XOR operation at row 66
+XOR operation at row 67
+XOR operation at row 68
+XOR operation at row 70
+XOR operation at row 73
+XOR operation at row 74
+XOR operation at row 76
+XOR operation at row 77
+True bits after iteration 9: [0 0 0 0 0 0 0 0 0 0]
+True bits after iteration 8: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 7: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 6: [0 0 0 0 0 0 0 0 1 0]
+True bits after iteration 5: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 4: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 3: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 2: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 1: [0 0 0 0 0 1 0 0 1 0]
+True bits after iteration 0: [0 0 0 0 0 1 0 0 1 0]
+Test parity: [0 1 1 0 0 1 1 0 0 1 1 1 0 1 1 0 1 1 1 0]
+End of algorithm"

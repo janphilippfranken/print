@@ -29,7 +29,7 @@ def generate_print_returns(modified_solutions, utility):
     
     return print_outputs
 
-def print_improve_algorithm(initial_solution, hints, utility, language_model):
+def print_improve_algorithm(initial_solution, print_statements, debug_outputs, utility, language_model):
     """Improves a solution according to a utility function."""
     
     expertise = "You are an expert computer science researcher and programmer, especially skilled at optimizing algorithms."
@@ -45,17 +45,23 @@ You will be evaluated based on this score function:
 {utility_str}
 ```
 
-You should consider the following information from debugging the solution:
+You should also consider the following print statements I have inserted:
+
+{print_statement}
+
+As well as their output:
 {debug_output}
+
 
 Considering the initial solution and debugging information, you must return an improved solution. Be as creative as you can under the constraints.
 Your primary improvement must be novel and non-trivial. First, propose an idea, then implement it. 
 You algorithm has to run within max of 2 seconds and you are not allwed to use external libraries besides numpy."""
-    messages = [message.format(initial_solution=initial_solution, utility_str=utility.str, debug_output=hint) for hint in hints]
+    messages = [message.format(initial_solution=initial_solution, utility_str=utility.str, print_statement=print_statement, debug_output=debug_output) for print_statement, debug_output in zip(print_statements, debug_outputs)]
     try:
         solutions = language_model.batch_prompt(expertise, messages)
     except:
         return "None", 0
     solutions = extract_code(solutions)
     best_solution_index, best_solution = max(enumerate(solutions), key=lambda x: utility.func(x[1])[0])
-    return best_solution, best_solution_index
+    average_utility = sum([utility.func(solution)[0] for solution in solutions]) / len(solutions)
+    return best_solution, best_solution_index, average_utility

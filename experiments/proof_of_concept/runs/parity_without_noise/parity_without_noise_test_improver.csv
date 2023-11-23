@@ -1,0 +1,138 @@
+,model,improvements,cost,solutions,utility
+0,improver,0,0.0,"import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(1, -1)))
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            for j in range(i + 1, len(aug_matrix)):
+                if aug_matrix[j, i] == 1:
+                    aug_matrix[j] = (aug_matrix[j] - aug_matrix[i]) % 2
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, n]
+        for j in range(i + 1, n):
+            if aug_matrix[i, j] == 1:
+                true_bits[i] ^= true_bits[j]
+    test_parity = np.sum(true_bits + test_samples, axis=1) % 2
+    return test_parity",0.0
+1,improver,1,0.24287999999999998,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+    for i in range(n):
+        pivot = np.where(aug_matrix[i:, i] == 1)[0]
+        if len(pivot) > 0:
+            pivot_row = pivot[0] + i
+            if pivot_row != i:
+                aug_matrix[[i, pivot_row]] = aug_matrix[[pivot_row, i]]
+            mask = aug_matrix[i+1:, i] == 1
+            aug_matrix[i+1:][mask] = (aug_matrix[i+1:][mask] - aug_matrix[i]) % 2
+
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, -1] ^ np.sum(aug_matrix[i, i+1:n] * true_bits[i+1:n])
+
+    test_parity = (np.sum(test_samples, axis=1) + np.sum(true_bits)) % 2
+    return test_parity
+",0.4833333333333333
+2,improver,2,0.48768,"
+import numpy as np
+
+def algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+    aug_matrix = aug_matrix[np.argsort(np.argmax(aug_matrix, axis=1))]
+
+    for i in range(n):
+        mask = aug_matrix[i+1:, i] == 1
+        aug_matrix[i+1:][mask] = (aug_matrix[i+1:][mask] - aug_matrix[i]) % 2
+
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, -1] ^ np.dot(aug_matrix[i, i+1:n], true_bits[i+1:n])
+
+    test_parity = (np.dot(test_samples, true_bits) + np.sum(true_bits)) % 2
+    return test_parity
+",0.3333333333333333
+3,improver,3,0.71643,"
+def optimized_algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+
+    for i in range(n):
+        maxrow = np.argmax(np.abs(aug_matrix[i:, i])) + i
+        aug_matrix[[i, maxrow]] = aug_matrix[[maxrow, i]]
+        mask = aug_matrix[i+1:, i] != 0
+        aug_matrix[i+1:][mask] -= aug_matrix[i] * aug_matrix[i+1:][mask, None]
+
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, -1] ^ (aug_matrix[i, i+1:n] @ true_bits[i+1:n])
+
+    test_parity = (test_samples @ true_bits + np.sum(true_bits)) % 2
+    return test_parity
+",0.0
+4,improver,4,0.92802,"
+def optimized_algorithm(train_samples, train_parity, test_samples):
+    n = train_samples.shape[1]
+    aug_matrix = np.hstack((train_samples, train_parity.reshape(-1, 1)))
+
+    for i in range(n):
+        maxrow = np.argmax(np.abs(aug_matrix[i:, i])) + i
+        aug_matrix[[i, maxrow]] = aug_matrix[[maxrow, i]]
+        pivot = aug_matrix[i, i]
+
+        if pivot != 0:
+            inv_pivot = 1 / pivot
+            aug_matrix[i] *= inv_pivot
+            for j in range(n):
+                if i != j:
+                    ratio = aug_matrix[j, i]
+                    aug_matrix[j] -= ratio * aug_matrix[i]
+
+    true_bits = np.zeros(n, dtype=int)
+    for i in reversed(range(n)):
+        true_bits[i] = aug_matrix[i, -1] ^ (aug_matrix[i, i+1:n] @ true_bits[i+1:n])
+
+    test_parity = (test_samples @ true_bits + np.sum(true_bits)) % 2
+    return test_parity
+",0.6666666666666666
+5,improver,5,1.1552099999999998,def algorithm(*args): return 0,0.5333333333333333
+6,improver,6,1.34466,"
+def algorithm(train_samples, train_parity, test_samples):
+    return np.bitwise_xor.reduce(test_samples, axis=1)
+",0.4666666666666667
+7,improver,7,1.5365399999999998,"
+class Perceptron(object):
+    def __init__(self, n_inputs, epochs=100, learning_rate=0.01):
+        self.epochs = epochs
+        self.learning_rate = learning_rate
+        self.weights = np.zeros(n_inputs + 1)
+
+    def predict(self, inputs):
+        sum = np.dot(inputs, self.weights[1:]) + self.weights[0]
+        return np.where(sum > 0, 1, 0)
+
+    def train(self, training_inputs, labels):
+        for _ in range(self.epochs):
+            for inputs, label in zip(training_inputs, labels):
+                prediction = self.predict(inputs)
+                self.weights[1:] += self.learning_rate * (label - prediction) * inputs
+                self.weights[0] += self.learning_rate * (label - prediction)
+
+
+def algorithm(train_samples, train_parity, test_samples):
+    perceptron = Perceptron(n_inputs=train_samples.shape[1])
+    perceptron.train(train_samples, train_parity)
+    return perceptron.predict(test_samples)
+",0.6166666666666667

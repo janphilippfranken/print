@@ -13,7 +13,7 @@ import random
 import numpy as np
 import pandas as pd
 
-from plot import plot_utility, plot_cost
+from plot import plot_utility, plot_cost, plot_average_utility
 
 def extract_code(
         algorithm_strs: List[str],
@@ -58,6 +58,7 @@ def save_data(
     combined_df.to_csv(f'{data_dir}/{sim_id}_combined.csv')
     # plot
     plot_utility(df=combined_df, data_dir=data_dir, sim_id=sim_id)
+    plot_average_utility(df=combined_df, data_dir=data_dir, sim_id=sim_id)
     plot_cost(df=combined_df, data_dir=data_dir, sim_id=sim_id)
 
 def update_dict(data_dict, key, value):

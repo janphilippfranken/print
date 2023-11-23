@@ -44,8 +44,8 @@ def main(args: DictConfig) -> None:
     args.model.azure_api.api_key = os.getenv("OPENAI_API_KEY")
     is_azure = args.model.api_type
     llm = get_llm(args, is_azure)
-    improve_language_model = LLMAgent(llm=llm, **args.model.llm)
-    print_improve_language_model= LLMAgent(llm=llm, **args.model.llm)
+    improve_language_model = LLMAgent(llm=llm, **args.model.llm_improve)
+    print_improve_language_model= LLMAgent(llm=llm, **args.model.llm_print)
 
     # get task and initial utility
     task = TASKS[args.task.task_id]
@@ -61,6 +61,7 @@ def main(args: DictConfig) -> None:
         'cost': [0], 
         'solutions': [initial_solution], 
         'utility': [task.utility.func(initial_solution)[0]],
+        'average_utility': [initial_utility],
     }
     
     # print improver
@@ -72,6 +73,7 @@ def main(args: DictConfig) -> None:
         'utility': [task.utility.func(initial_solution)[0]],
         'modified_solutions': [initial_solution],
         'print_returns': ['None'],
+        'average_utility': [initial_utility],
     }
 
     # main inner loop using the scaffold program to find improved solution to the task and evaluating these solutions
@@ -81,27 +83,45 @@ def main(args: DictConfig) -> None:
             breakpoint()
         else:
             # generate improved solution using improver 
-            improved_solution = improve_algorithm(improver_data['solutions'][-1], 
+            improved_solution, average_improved_utility = improve_algorithm(improver_data['solutions'][-1], 
                                                   task.utility, 
                                                   improve_language_model)
             # append results 
-            improver_data['cost'].append(improve_language_model.total_inference_cost)
-            improver_data['solutions'].append(improved_solution)
-            improver_data['utility'].append(task.utility.func(improved_solution)[0])
+            if task.utility.func(improved_solution)[0] > improver_data['utility'][-1]:
+                improver_data['cost'].append(improve_language_model.total_inference_cost)
+                improver_data['solutions'].append(improved_solution)
+                improver_data['utility'].append(task.utility.func(improved_solution)[0])
+                improver_data['average_utility'].append(average_improved_utility)
+            else:
+                improver_data['cost'].append(improve_language_model.total_inference_cost)
+                improver_data['solutions'].append(improver_data['solutions'][-1])
+                improver_data['utility'].append(improver_data['utility'][-1])
+                improver_data['average_utility'].append(improver_data['average_utility'][-1])
 
             # generate improved solution using print improver
             modified_solutions = insert_prints(print_improver_data['solutions'][-1], print_improve_language_model)
             print_returns = generate_print_returns(modified_solutions, task.utility) # evaluate modified code to get print returns
-            print_improved_solution, modified_solution_idx = print_improve_algorithm(print_improver_data['solutions'][-1], 
+            breakpoint()
+            print_improved_solution, modified_solution_idx, average_print_improved_utility, = print_improve_algorithm(print_improver_data['solutions'][-1], 
+                                                                                     modified_solutions,
                                                                                      print_returns, 
                                                                                      task.utility, 
                                                                                      print_improve_language_model) # llm call 2: improve solution using print returns
             # append results
-            print_improver_data['cost'].append(print_improve_language_model.total_inference_cost)
-            print_improver_data['solutions'].append(print_improved_solution)
-            print_improver_data['utility'].append(task.utility.func(print_improved_solution)[0])
-            print_improver_data['modified_solutions'].append(modified_solutions[modified_solution_idx])
-            print_improver_data['print_returns'].append(print_returns[modified_solution_idx])
+            if task.utility.func(print_improved_solution)[0] > print_improver_data['utility'][-1]:
+                print_improver_data['cost'].append(print_improve_language_model.total_inference_cost)
+                print_improver_data['solutions'].append(print_improved_solution)
+                print_improver_data['utility'].append(task.utility.func(print_improved_solution)[0])
+                print_improver_data['modified_solutions'].append(modified_solutions[modified_solution_idx])
+                print_improver_data['print_returns'].append(print_returns[modified_solution_idx])
+                print_improver_data['average_utility'].append(average_print_improved_utility)
+            else:
+                print_improver_data['cost'].append(print_improve_language_model.total_inference_cost)
+                print_improver_data['solutions'].append(print_improver_data['solutions'][-1])
+                print_improver_data['utility'].append(print_improver_data['utility'][-1])
+                print_improver_data['modified_solutions'].append(print_improver_data['modified_solutions'][-1])
+                print_improver_data['print_returns'].append(print_improver_data['print_returns'][-1])
+                print_improver_data['average_utility'].append(print_improver_data['average_utility'][-1])
 
     # save and plot data 
     save_data(improver_data=improver_data, 
